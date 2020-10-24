@@ -1,0 +1,22 @@
+plugins {
+    id 'java-library'
+    id 'application'
+}
+
+application {
+	mainClass='com.planktonengine.UCIInterface'
+}
+
+jar { 
+	manifest {
+		attributes 'Main-Class': 'com.planktonengine.UCIInterface'
+	}
+}
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.12'
+}
