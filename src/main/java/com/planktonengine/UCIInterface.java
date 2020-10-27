@@ -162,7 +162,7 @@ public class UCIInterface{
 					j+=boardRows[i].charAt(j)-'1';
 				}else{
 					int color=Character.isUpperCase(boardRows[i].charAt(j)) ? 0 : 1;
-					game.piecePositions[color][pieceToInt.get(Character.toLowerCase(boardRows[i].charAt(j)))].setSquare(j, i, true);
+					game.piecePositions[color][pieceToInt.get(Character.toLowerCase(boardRows[i].charAt(j)))].setSquare(j, 7-i, true);
 				}
 			}
 		}
@@ -196,7 +196,6 @@ public class UCIInterface{
 
 		@Override
 		public void run(){
-			System.out.println(waitTime);
 			try{
 				Thread.sleep(waitTime);
 			}catch(InterruptedException e){
