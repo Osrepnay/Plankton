@@ -123,8 +123,11 @@ public class UCIInterface{
 					}
 					int[] startPos=new int[]{(int)(bestMove[0]%8), (int)(bestMove[0]/8)};
 					int[] endPos=new int[]{(int)(bestMove[1]%8), (int)(bestMove[1]/8)};
-					System.out.println("bestmove "+(char)(startPos[0]+'a')+(startPos[1]+1)+
-							(char)(endPos[0]+'a')+(endPos[1]+1));
+					String printString="bestmove "+(char)(startPos[0]+'a')+(startPos[1]+1)+(char)(endPos[0]+'a')+(endPos[1]+1);
+					if(game.piecePositions[color][0].getSquare(bestMove[0]) && (endPos[1]==0 || endPos[1]==7)){
+						printString+="q";
+					}
+					System.out.println(printString);
 					break;
 				case "debug":
 					if(input[1].equals("on")){
