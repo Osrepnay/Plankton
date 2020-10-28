@@ -34,15 +34,20 @@ public class UCIInterface{
 				case "position":
 					game.resetGame();
 					int offset=3;
-					if(input[1].equals("fen")){
-						color=input[3].equals("w") ? 0 : 1;
-						parseFEN(game, String.join(" ", Arrays.copyOfRange(input, 2, input.length)));
-						offset=9;
-					}
 					if(input.length<=2){
 						color=0;
 					}else{
 						color=input.length%2==0 ? 1 : 0;
+					}
+					if(input[1].equals("fen")){
+						color=input[3].equals("w") ? 0 : 1;
+						parseFEN(game, String.join(" ", Arrays.copyOfRange(input, 2, input.length)));
+						offset=9;
+						if(input.length<=7){
+							color=0;
+						}else{
+							color=input.length%2==0 ? 0 : 1;
+						}
 					}
 					for(int i=offset; i<input.length; i++){
 						int startPos=(input[i].charAt(0)-'a')+(Character.getNumericValue(input[i].charAt(1))-1)*8;
