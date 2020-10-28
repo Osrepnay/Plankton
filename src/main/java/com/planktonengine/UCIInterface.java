@@ -86,6 +86,9 @@ public class UCIInterface{
 					game.setMoves();
 					break;
 				case "go":
+					if(debug){
+						System.out.printf("info string color %s\n", String.valueOf(color));
+					}
 					long[] times=new long[2];
 					long moveTime=-1;
 					boolean infinite=false;
@@ -106,7 +109,7 @@ public class UCIInterface{
 						}
 					}
 					long startTime=System.currentTimeMillis();
-					long time=moveTime==-1 ? (color==0 ? times[0]/20 : times[1]/20) : moveTime;
+					long time=moveTime==-1 ? (color==0 ? times[0]/30 : times[1]/30) : moveTime;
 					time+=2000;
 					double[] bestMove=new double[4];
 					engine.keepSearching=true;
