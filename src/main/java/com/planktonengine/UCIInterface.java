@@ -10,7 +10,6 @@ public class UCIInterface{
 	private static Game game=new Game();
 
 	public static void main(String[] args) throws IOException{
-		System.setOut(System.out);
 		System.out.println("PlanktonEngine");
 		BufferedReader reader=new BufferedReader(new InputStreamReader(System.in));
 		String[] input=reader.readLine().split(" ");
@@ -34,57 +33,57 @@ public class UCIInterface{
 					break;
 				case "position":
 					game.resetGame();
-					if(input[1].equals("startpos")){
-						if(input.length<=2){
-							color=0;
-						}else{
-							color=input.length%2==0 ? 1 : 0;
+					int offset=3;
+					if(input[1].equals("fen")){
+						color=input[3].equals("w") ? 0 : 1;
+						parseFEN(game, String.join(" ", Arrays.copyOfRange(input, 2, input.length)));
+						offset=9;
+					}
+					if(input.length<=2){
+						color=0;
+					}else{
+						color=input.length%2==0 ? 1 : 0;
+					}
+					for(int i=offset; i<input.length; i++){
+						int startPos=(input[i].charAt(0)-'a')+(Character.getNumericValue(input[i].charAt(1))-1)*8;
+						int move=(input[i].charAt(2)-'a')+(Character.getNumericValue(input[i].charAt(3))-1)*8;
+						int moveColor=i%2==0 ? 1 : 0;
+						int piece=-1;
+						boolean special=false;
+						for(int j=0; j<game.piecePositions[0].length; j++){
+							if(game.piecePositions[0][j].getSquare(startPos)){
+								piece=j;
+								break;
+							}
 						}
-						for(int i=3; i<input.length; i++){
-							int startPos=(input[i].charAt(0)-'a')+(Character.getNumericValue(input[i].charAt(1))-1)*8;
-							int move=(input[i].charAt(2)-'a')+(Character.getNumericValue(input[i].charAt(3))-1)*8;
-							int moveColor=i%2==0 ? 1 : 0;
-							int piece=-1;
-							boolean special=false;
-							for(int j=0; j<game.piecePositions[0].length; j++){
-								if(game.piecePositions[0][j].getSquare(startPos)){
+						if(piece==-1){
+							for(int j=0; j<game.piecePositions[1].length; j++){
+								if(game.piecePositions[1][j].getSquare(startPos)){
 									piece=j;
 									break;
 								}
 							}
-							if(piece==-1){
-								for(int j=0; j<game.piecePositions[1].length; j++){
-									if(game.piecePositions[1][j].getSquare(startPos)){
-										piece=j;
-										break;
-									}
-								}
-							}
-							if(piece==5){
-								if(Math.abs(startPos-move)==2){
-									special=true;
-								}
-							}else if(piece==0){
-								if((move>=0 && move<8) || (move>=56 && move<64)){
-									special=true;
-								}else if(Math.abs(move-startPos)==7 || Math.abs(move-startPos)==9){
-									boolean enPassantExists=true;
-									for(int j=0; j<game.piecePositions[color ^ 1].length; j++){
-										if(game.piecePositions[color ^ 1][j].getSquare(move)){
-											enPassantExists=false;
-										}
-									}
-									special=special || enPassantExists;
-								}
-							}
-							game.makeMove(new int[]{startPos, move}, moveColor, piece, special);
 						}
-						game.setMoves();
-					}else{
-						color=input[3].equals("w") ? 0 : 1;
-						parseFEN(game, String.join(" ", Arrays.copyOfRange(input, 2, input.length)));
-						game.setMoves();
+						if(piece==5){
+							if(Math.abs(startPos-move)==2){
+								special=true;
+							}
+						}else if(piece==0){
+							if((move>=0 && move<8) || (move>=56 && move<64)){
+								special=true;
+								}else if(Math.abs(move-startPos)==7 || Math.abs(move-startPos)==9){
+								boolean enPassantExists=true;
+								for(int j=0; j<game.piecePositions[color ^ 1].length; j++){
+									if(game.piecePositions[color ^ 1][j].getSquare(move)){
+										enPassantExists=false;
+									}
+								}
+								special=special || enPassantExists;
+							}
+						}
+						game.makeMove(new int[]{startPos, move}, moveColor, piece, special);
 					}
+					game.setMoves();
 					break;
 				case "go":
 					long[] times=new long[2];
