@@ -10,7 +10,6 @@ public class Game{
 		resetGame();
 	}
 
-	//TODO en passant
 	public PrevMoveGameState makeMove(int[] move, int color, int piece, boolean special){
 		int opponentColor=color ^ 1;
 		int capturePiece=-1;
@@ -61,15 +60,18 @@ public class Game{
 					piecePositions[color][4].setSquare(move[1], true);
 					promotion=4;
 				}else{
-					for(int i=0; i<piecePositions[opponentColor].length; i++){
-						if(piecePositions[opponentColor][i].getSquare(move[1]+1)){
-							capturePiece=i;
-							piecePositions[opponentColor][capturePiece].setSquare(move[1]+1, false);
-							break;
-						}else if(piecePositions[opponentColor][i].getSquare(move[1]-1)){
-							capturePiece=i;
-							piecePositions[opponentColor][capturePiece].setSquare(move[1]-1, false);
-							break;
+					capturePiece=0;
+					if(color==0){
+						if(move[1]-move[0]==7){
+							piecePositions[opponentColor][0].setSquare(move[0]-1, false);
+						}else{
+							piecePositions[opponentColor][0].setSquare(move[0]+1, false);
+						}
+					}else{
+						if(move[0]-move[1]==7){
+							piecePositions[opponentColor][0].setSquare(move[0]+1, false);
+						}else{
+							piecePositions[opponentColor][0].setSquare(move[0]-1, false);
 						}
 					}
 				}
@@ -118,7 +120,24 @@ public class Game{
 			}
 		}else if(piece==0){
 			if(special){
-				piecePositions[color][prevMoveState.getPromotion()].setSquare(move[1], false);
+				if((move[1]>=56 && move[1]<64) || (move[1]>=0 && move[1]<8)){
+					piecePositions[color][piece].setSquare(move[1], true);
+					piecePositions[color][prevMoveState.getPromotion()].setSquare(move[1], false);
+				}else{
+					if(color==0){
+						if(move[1]-move[0]==7){
+							piecePositions[opponentColor][0].setSquare(move[0]-1, true);
+						}else{
+							piecePositions[opponentColor][0].setSquare(move[0]+1, true);
+						}
+					}else{
+						if(move[0]-move[1]==7){
+							piecePositions[opponentColor][0].setSquare(move[0]+1, true);
+						}else{
+							piecePositions[opponentColor][0].setSquare(move[0]-1, true);
+						}
+					}
+				}
 			}
 		}
 		setMoves();

@@ -71,18 +71,23 @@ public class UCIInterface{
 						}else if(piece==0){
 							if((move>=0 && move<8) || (move>=56 && move<64)){
 								special=true;
-								}else if(Math.abs(move-startPos)==7 || Math.abs(move-startPos)==9){
-								boolean enPassantExists=true;
-								for(int j=0; j<game.piecePositions[color ^ 1].length; j++){
-									if(game.piecePositions[color ^ 1][j].getSquare(move)){
-										enPassantExists=false;
-									}
-								}
-								special=special || enPassantExists;
 							}
+							boolean enPassantExists=true;
+							for(int j=0; j<game.piecePositions[color ^ 1].length; j++){
+								if(game.piecePositions[color ^ 1][j].getSquare(move)){
+									enPassantExists=false;
+								}
+							}
+							special=special || enPassantExists;
 						}
 						game.makeMove(new int[]{startPos, move}, moveColor, piece, special);
 					}
+					Bitboard pieces=new Bitboard();
+					for(int a=0; a<game.piecePositions[0].length; a++){
+						pieces=new Bitboard(game.piecePositions[0][a].getBitboard() | game.piecePositions[1][a].getBitboard() | pieces.getBitboard());
+					}
+					BitboardUtility.printBoard(pieces);
+					System.out.println();
 					game.setMoves();
 					break;
 				case "go":
