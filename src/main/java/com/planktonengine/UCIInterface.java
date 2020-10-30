@@ -1,6 +1,8 @@
 package com.planktonengine;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -44,6 +46,9 @@ public class UCIInterface{
 						parseFEN(game, String.join(" ", Arrays.copyOfRange(input, 2, input.length)));
 						offset=9;
 					}
+					if(debug){
+						System.out.printf("info string color %s\n", color);
+					}
 					for(int i=offset; i<input.length; i++){
 						int startPos=(input[i].charAt(0)-'a')+(Character.getNumericValue(input[i].charAt(1))-1)*8;
 						int move=(input[i].charAt(2)-'a')+(Character.getNumericValue(input[i].charAt(3))-1)*8;
@@ -84,16 +89,14 @@ public class UCIInterface{
 					}
 					Bitboard pieces=new Bitboard();
 					for(int a=0; a<game.piecePositions[0].length; a++){
-						pieces=new Bitboard(game.piecePositions[0][a].getBitboard() | game.piecePositions[1][a].getBitboard() | pieces.getBitboard());
+						pieces=new Bitboard(game.piecePositions[0][a].getBitboard()
+								| game.piecePositions[1][a].getBitboard() | pieces.getBitboard());
 					}
 					BitboardUtility.printBoard(pieces);
 					System.out.println();
 					game.setMoves();
 					break;
 				case "go":
-					if(debug){
-						System.out.printf("info string color %s\n", String.valueOf(color));
-					}
 					long[] times=new long[2];
 					long moveTime=-1;
 					boolean infinite=false;
@@ -130,7 +133,8 @@ public class UCIInterface{
 					}
 					int[] startPos=new int[]{(int)(bestMove[0]%8), (int)(bestMove[0]/8)};
 					int[] endPos=new int[]{(int)(bestMove[1]%8), (int)(bestMove[1]/8)};
-					String printString="bestmove "+(char)(startPos[0]+'a')+(startPos[1]+1)+(char)(endPos[0]+'a')+(endPos[1]+1);
+					String printString="bestmove "+(char)(startPos[0]+'a')+(startPos[1]+1)+(char)(endPos[0]+'a')
+							+(endPos[1]+1);
 					if(game.piecePositions[color][0].getSquare((int)bestMove[0]) && (endPos[1]==0 || endPos[1]==7)){
 						printString+="q";
 					}
@@ -157,6 +161,7 @@ public class UCIInterface{
 	}
 
 	public static void parseFEN(Game game, String fen){
+		game.blankGame();
 		String[] fenSections=fen.split(" ");
 		String[] boardRows=fenSections[0].split("/");
 		HashMap<Character, Integer> pieceToInt=new HashMap<>();
@@ -167,12 +172,16 @@ public class UCIInterface{
 		pieceToInt.put('q', 4);
 		pieceToInt.put('k', 5);
 		for(int i=boardRows.length-1; i>=0; i--){
+			int offset=0;
 			for(int j=0; j<8; j++){
-				if(Character.isDigit(boardRows[i].charAt(j))){
-					j+=boardRows[i].charAt(j)-'1';
+				int newJ=j-offset;
+				if(Character.isDigit(boardRows[i].charAt(j-offset))){
+					j+=boardRows[i].charAt(newJ)-'1';
+					offset+=boardRows[i].charAt(newJ)-'1';
 				}else{
-					int color=Character.isUpperCase(boardRows[i].charAt(j)) ? 0 : 1;
-					game.piecePositions[color][pieceToInt.get(Character.toLowerCase(boardRows[i].charAt(j)))].setSquare(j, 7-i, true);
+					int color=Character.isUpperCase(boardRows[i].charAt(newJ)) ? 0 : 1;
+					game.piecePositions[color][pieceToInt.get(Character.toLowerCase(boardRows[i].charAt(newJ)))]
+							.setSquare(j, 7-i, true);
 				}
 			}
 		}
@@ -193,6 +202,8 @@ public class UCIInterface{
 						break;
 				}
 			}
+		}else{
+			game.castleAvailable=new boolean[4];
 		}
 	}
 

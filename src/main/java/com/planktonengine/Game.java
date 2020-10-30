@@ -55,7 +55,7 @@ public class Game{
 			}
 		}else if(piece==0){
 			if(special){
-				if((move[1]>=56 && move[1]<64) || (move[1]>=0 && move[1]<8)){
+				if(move[1]>=56 || move[1]<8){
 					piecePositions[color][piece].setSquare(move[1], false);
 					piecePositions[color][4].setSquare(move[1], true);
 					promotion=4;
@@ -120,8 +120,8 @@ public class Game{
 			}
 		}else if(piece==0){
 			if(special){
-				if((move[1]>=56 && move[1]<64) || (move[1]>=0 && move[1]<8)){
-					piecePositions[color][piece].setSquare(move[1], true);
+				if(move[1]>=56 || move[1]<8){
+					piecePositions[color][piece].setSquare(move[0], true);
 					piecePositions[color][prevMoveState.getPromotion()].setSquare(move[1], false);
 				}else{
 					if(color==0){

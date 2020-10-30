@@ -91,7 +91,7 @@ public class MoveGen{
 	public PieceMoves genPawn(int position, Bitboard blockers, int color){
 		PieceMoves pieceMoves=new PieceMoves();
 		int posChange=-((color*2-1)*8);
-		boolean promotion=position+2*posChange<0 || position+2*posChange>=64;
+		boolean promotion=position+posChange>=56 || position+posChange<8;
 		if(!blockers.getSquare(position+posChange)){
 			pieceMoves.addMove(position+posChange, promotion);
 			if(color==0){
