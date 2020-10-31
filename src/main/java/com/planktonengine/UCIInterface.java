@@ -42,7 +42,9 @@ public class UCIInterface{
 						color=input.length%2==0 ? 1 : 0;
 					}
 					if(input[1].equals("fen")){
-						color=input[3].equals("w") ? 0 : 1;
+						if(input.length<=7){
+							color=input[3].equals("w") ? 0 : 1;
+						}
 						parseFEN(game, String.join(" ", Arrays.copyOfRange(input, 2, input.length)));
 						offset=9;
 					}
@@ -76,16 +78,20 @@ public class UCIInterface{
 						}else if(piece==0){
 							if((move>=0 && move<8) || (move>=56 && move<64)){
 								special=true;
-							}
-							boolean enPassantExists=true;
-							for(int j=0; j<game.piecePositions[color ^ 1].length; j++){
-								if(game.piecePositions[color ^ 1][j].getSquare(move)){
-									enPassantExists=false;
+							}else{
+								if(Math.abs(startPos-move)!=8){
+									boolean enPassantExists=true;
+									for(int j=0; j<game.piecePositions[color ^ 1].length; j++){
+										if(game.piecePositions[color ^ 1][j].getSquare(move)){
+											enPassantExists=false;
+										}
+									}
+									special=special || enPassantExists;
 								}
 							}
-							special=special || enPassantExists;
 						}
 						game.makeMove(new int[]{startPos, move}, moveColor, piece, special);
+						color=moveColor ^ 1;
 					}
 					Bitboard pieces=new Bitboard();
 					for(int a=0; a<game.piecePositions[0].length; a++){
