@@ -42,7 +42,7 @@ public class UCIInterface{
 						color=input.length%2==0 ? 1 : 0;
 					}
 					if(input[1].equals("fen")){
-						if(input.length<=7){
+						if(input.length<=8){
 							color=input[3].equals("w") ? 0 : 1;
 						}
 						parseFEN(game, String.join(" ", Arrays.copyOfRange(input, 2, input.length)));
