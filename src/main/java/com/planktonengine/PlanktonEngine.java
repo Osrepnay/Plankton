@@ -136,7 +136,7 @@ public class PlanktonEngine{
 
 	/**
 	 * @param game Current state of the game
-	 * @return The score based purely off of the pieces and if it is checkmate.
+	 * @return The score based purely off of the pieces, moves, and if it is checkmate.
 	 */
 	public double eval(Game game){
 		if(inCheckmate(game, 0)){
@@ -147,12 +147,34 @@ public class PlanktonEngine{
 		}
 		double[] pieceScores=new double[]{1, 3, 3.25, 5, 9, 10000};
 		double score=0;
+		double totalScore=0;
 		for(int piece=0; piece<game.piecePositions[0].length; piece++){
-			score+=Long.bitCount(game.piecePositions[0][piece].getBitboard())*pieceScores[piece];
+			double wScore=Long.bitCount(game.piecePositions[0][piece].getBitboard())*pieceScores[piece];
+			double bScore=Long.bitCount(game.piecePositions[1][piece].getBitboard())*pieceScores[piece];
+			score+=wScore;
+			score-=bScore;
+			totalScore+=wScore+bScore;
 		}
-		for(int piece=0; piece<game.piecePositions[1].length; piece++){
-			score-=Long.bitCount(game.piecePositions[1][piece].getBitboard())*pieceScores[piece];
+		int[] moveCount=new int[2];
+		if(totalScore>=10){
+			for(int square=0; square<64; square++){
+				int color=-1;
+				for(int piece=0; piece<game.piecePositions[0].length; piece++){
+					if(game.piecePositions[0][piece].getSquare(square)){
+						color=0;
+						score+=PSTables.psTables[piece][square]/10;
+					}else if(game.piecePositions[1][piece].getSquare(square)){
+						color=1;
+						score-=PSTables.psTables[piece][63-square]/10;
+					}
+				}
+				if(color!=-1){
+					moveCount[color]+=game.pieceMoves[square].getMoves().size();
+				}
+			}
 		}
+		score+=moveCount[0]/100;
+		score-=moveCount[1]/100;
 		return score;
 	}
 
