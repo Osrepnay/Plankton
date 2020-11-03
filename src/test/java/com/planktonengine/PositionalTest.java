@@ -1,5 +1,7 @@
 package com.planktonengine;
 
+import java.util.Arrays;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -32,7 +34,7 @@ public class PositionalTest{
 		game.castleAvailable=new boolean[4];
 		game.setMoves();
 		double[] bestMove=engine.bestMove(game, 0, 3);
-		Assert.assertArrayEquals(new double[]{4, 10, 3}, bestMove, 0);
+		Assert.assertArrayEquals(new double[]{4, 10}, Arrays.copyOfRange(bestMove, 0, 2), 0);
 	}
 
 }

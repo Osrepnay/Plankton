@@ -15,35 +15,34 @@ public class PlanktonEngine{
 	public double[] bestMove(Game game, int color, int depth){
 		double[] bestMove=new double[]{-1, -1, 0};
 		double bestMoveScore=color==0 ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-		for(int piece=0; piece<game.piecePositions[color].length; piece++){
-			for(int square=0; square<64; square++){
-				if(!game.piecePositions[color][piece].getSquare(square)){
+		for(int square=0; square<64; square++){
+			if(!game.squareToColor.containsKey(square) || game.squareToColor.get(square)!=color){
+				continue;
+			}
+			int piece=game.squareToPiece.get(square);
+			for(int moveIndex=0; moveIndex<game.pieceMoves[square].getMoves().size(); moveIndex++){
+				if(!keepSearching){
+					return new double[]{-1, -1, 0};
+				}
+				int[] move=new int[]{square, game.pieceMoves[square].getMove(moveIndex)};
+				boolean specialMove=game.pieceMoves[square].isSpecial(moveIndex);
+				if(!validMove(game, move, color, piece, specialMove)){
 					continue;
 				}
-				for(int moveIndex=0; moveIndex<game.pieceMoves[square].getMoves().size(); moveIndex++){
-					if(!keepSearching){
-						return new double[]{-1, -1, 0};
-					}
-					int[] move=new int[]{square, game.pieceMoves[square].getMove(moveIndex)};
-					boolean specialMove=game.pieceMoves[square].isSpecial(moveIndex);
-					if(!validMove(game, move, color, piece, specialMove)){
-						continue;
-					}
-					PrevMoveGameState prevMoveState=game.makeMove(move, color, piece, specialMove);
-					double moveScore=color==0
-							? min(game, bestMoveScore, Integer.MAX_VALUE,
-									depth-1)
-							: max(game, Integer.MIN_VALUE, bestMoveScore,
-									depth-1);
-					game.unMakeMove(move, color, piece, specialMove, prevMoveState);
-					//sign for ran out of time
-					if(moveScore==Double.MAX_VALUE){
-						return new double[]{-1, -1, 0};
-					}
-					if(color==0 ? moveScore>bestMoveScore : moveScore<bestMoveScore){
-						bestMoveScore=moveScore;
-						bestMove=new double[]{move[0], move[1], bestMoveScore};
-					}
+				PrevMoveGameState prevMoveState=game.makeMove(move, color, piece, specialMove);
+				double moveScore=color==0
+						? min(game, bestMoveScore, Integer.MAX_VALUE,
+								depth-1)
+						: max(game, Integer.MIN_VALUE, bestMoveScore,
+								depth-1);
+				game.unMakeMove(move, color, piece, specialMove, prevMoveState);
+				//sign for ran out of time
+				if(moveScore==Double.MAX_VALUE){
+					return new double[]{-1, -1, 0};
+				}
+				if(color==0 ? moveScore>bestMoveScore : moveScore<bestMoveScore){
+					bestMoveScore=moveScore;
+					bestMove=new double[]{move[0], move[1], bestMoveScore};
 				}
 			}
 		}
@@ -61,31 +60,30 @@ public class PlanktonEngine{
 		if(depth<=0){
 			return eval(game);
 		}
-		for(int piece=0; piece<game.piecePositions[0].length; piece++){
-			for(int square=0; square<64; square++){
-				if(!game.piecePositions[0][piece].getSquare(square)){
+		for(int square=0; square<64; square++){
+			if(!game.squareToColor.containsKey(square) || game.squareToColor.get(square)!=0){
+				continue;
+			}
+			int piece=game.squareToPiece.get(square);
+			for(int moveIndex=0; moveIndex<game.pieceMoves[square].getMoves().size(); moveIndex++){
+				if(!keepSearching){
+					return Double.MAX_VALUE;
+				}
+				int[] move=new int[]{square, game.pieceMoves[square].getMove(moveIndex)};
+				boolean specialMove=game.pieceMoves[square].isSpecial(moveIndex);
+				if(!validMove(game, move, 0, piece, specialMove)){
 					continue;
 				}
-				for(int moveIndex=0; moveIndex<game.pieceMoves[square].getMoves().size(); moveIndex++){
-					if(!keepSearching){
-						return Double.MAX_VALUE;
-					}
-					int[] move=new int[]{square, game.pieceMoves[square].getMove(moveIndex)};
-					boolean specialMove=game.pieceMoves[square].isSpecial(moveIndex);
-					if(!validMove(game, move, 0, piece, specialMove)){
-						continue;
-					}
-					PrevMoveGameState prevMoveState=game.makeMove(move, 0, piece, specialMove);
+				PrevMoveGameState prevMoveState=game.makeMove(move, 0, piece, specialMove);
 
-					double moveScore=min(game, alpha, beta, depth-1);
-					game.unMakeMove(move, 0, piece, specialMove, prevMoveState);
+				double moveScore=min(game, alpha, beta, depth-1);
+				game.unMakeMove(move, 0, piece, specialMove, prevMoveState);
 
-					if(moveScore>=beta){
-						return beta;
-					}
-					if(moveScore>alpha){
-						alpha=moveScore;
-					}
+				if(moveScore>=beta){
+					return beta;
+				}
+				if(moveScore>alpha){
+					alpha=moveScore;
 				}
 			}
 		}
@@ -103,31 +101,30 @@ public class PlanktonEngine{
 		if(depth<=0){
 			return eval(game);
 		}
-		for(int piece=0; piece<game.piecePositions[1].length; piece++){
-			for(int square=0; square<64; square++){
-				if(!game.piecePositions[1][piece].getSquare(square)){
+		for(int square=0; square<64; square++){
+			if(!game.squareToColor.containsKey(square) || game.squareToColor.get(square)!=1){
+				continue;
+			}
+			int piece=game.squareToPiece.get(square);
+			for(int moveIndex=0; moveIndex<game.pieceMoves[square].getMoves().size(); moveIndex++){
+				if(!keepSearching){
+					return Double.MAX_VALUE;
+				}
+				int[] move=new int[]{square, game.pieceMoves[square].getMove(moveIndex)};
+				boolean specialMove=game.pieceMoves[square].isSpecial(moveIndex);
+				if(!validMove(game, move, 1, piece, specialMove)){
 					continue;
 				}
-				for(int moveIndex=0; moveIndex<game.pieceMoves[square].getMoves().size(); moveIndex++){
-					if(!keepSearching){
-						return Double.MAX_VALUE;
-					}
-					int[] move=new int[]{square, game.pieceMoves[square].getMove(moveIndex)};
-					boolean specialMove=game.pieceMoves[square].isSpecial(moveIndex);
-					if(!validMove(game, move, 1, piece, specialMove)){
-						continue;
-					}
-					PrevMoveGameState prevMoveState=game.makeMove(move, 1, piece, specialMove);
+				PrevMoveGameState prevMoveState=game.makeMove(move, 1, piece, specialMove);
 
-					double moveScore=max(game, alpha, beta, depth-1);
-					game.unMakeMove(move, 1, piece, specialMove, prevMoveState);
+				double moveScore=max(game, alpha, beta, depth-1);
+				game.unMakeMove(move, 1, piece, specialMove, prevMoveState);
 
-					if(moveScore<=alpha){
-						return alpha;
-					}
-					if(moveScore<beta){
-						beta=moveScore;
-					}
+				if(moveScore<=alpha){
+					return alpha;
+				}
+				if(moveScore<beta){
+					beta=moveScore;
 				}
 			}
 		}
@@ -158,18 +155,18 @@ public class PlanktonEngine{
 		int[] moveCount=new int[2];
 		if(totalScore>=10){
 			for(int square=0; square<64; square++){
-				int color=-1;
-				for(int piece=0; piece<game.piecePositions[0].length; piece++){
-					if(game.piecePositions[0][piece].getSquare(square)){
+				if(game.squareToColor.containsKey(square)){
+					int color=-1;
+					if(game.squareToColor.get(square)==0){
 						color=0;
-						score+=PSTables.psTables[piece][square]/10;
-					}else if(game.piecePositions[1][piece].getSquare(square)){
+						score+=PSTables.psTables[game.squareToPiece.get(square)][square]/10;
+					}else if(game.squareToColor.get(square)==1){
 						color=1;
-						score-=PSTables.psTables[piece][63-square]/10;
+						score-=PSTables.psTables[game.squareToPiece.get(square)][63-square]/10;
 					}
-				}
-				if(color!=-1){
-					moveCount[color]+=game.pieceMoves[square].getMoves().size();
+					if(color!=-1){
+						moveCount[color]+=game.pieceMoves[square].getMoves().size();
+					}
 				}
 			}
 		}
@@ -187,10 +184,8 @@ public class PlanktonEngine{
 	 * @return Returns a boolean that tells if the move is legal or not
 	 */
 	public boolean validMove(Game game, int[] move, int color, int piece, boolean specialMove){
-		for(int i=0; i<game.piecePositions[color].length; i++){
-			if(game.piecePositions[color][i].getSquare(move[1])){
-				return false;
-			}
+		if(game.squareToColor.containsKey(move[1]) && game.squareToColor.get(move[1])==color){
+			return false;
 		}
 		PrevMoveGameState prevMoveState=game.makeMove(move, color, piece, specialMove);
 		if(inCheck(game, color)){
@@ -235,12 +230,10 @@ public class PlanktonEngine{
 	public boolean inCheck(Game game, int color){
 		int opponentColor=color ^ 1;
 		for(int square=0; square<64; square++){
-			for(int piece=0; piece<game.piecePositions[opponentColor].length; piece++){
-				if(game.piecePositions[opponentColor][piece].getSquare(square)){
-					if((BitboardUtility.pieceMovesToBitboard(game.pieceMoves[square]).getBitboard()
-							& game.piecePositions[color][5].getBitboard())!=0){
-						return true;
-					}
+			if(game.squareToColor.containsKey(square) && game.squareToColor.get(square)==opponentColor){
+				if((BitboardUtility.pieceMovesToBitboard(game.pieceMoves[square]).getBitboard()
+						& game.piecePositions[color][5].getBitboard())!=0){
+					return true;
 				}
 			}
 		}
@@ -256,25 +249,23 @@ public class PlanktonEngine{
 		if(!inCheck(game, color)){
 			return false;
 		}
-		for(int piece=0; piece<game.piecePositions[color].length; piece++){
-			for(int square=0; square<64; square++){
-				if(!game.piecePositions[color][piece].getSquare(square)){
+		for(int square=0; square<64; square++){
+			if(!game.squareToColor.containsKey(square) || game.squareToColor.get(square)!=color){
+				continue;
+			}
+			int piece=game.squareToPiece.get(square);
+			for(int moveIndex=0; moveIndex<game.pieceMoves[square].getMoves().size(); moveIndex++){
+				int[] move=new int[]{square, game.pieceMoves[square].getMove(moveIndex)};
+				boolean specialMove=game.pieceMoves[square].isSpecial(moveIndex);
+				if(!validMove(game, move, color, piece, specialMove)){
 					continue;
 				}
-				for(int moveIndex=0; moveIndex<game.pieceMoves[square].getMoves().size(); moveIndex++){
-					int[] move=new int[]{square, game.pieceMoves[square].getMove(moveIndex)};
-					boolean specialMove=game.pieceMoves[square].isSpecial(moveIndex);
-					if(!validMove(game, move, color, piece, specialMove)){
-						continue;
-					}
-					PrevMoveGameState prevMoveState=game.makeMove(move, color, piece, specialMove);
-					if(!inCheck(game, color)){
-						game.unMakeMove(move, color, piece, specialMove, prevMoveState);
-						return false;
-					}
+				PrevMoveGameState prevMoveState=game.makeMove(move, color, piece, specialMove);
+				if(!inCheck(game, color)){
 					game.unMakeMove(move, color, piece, specialMove, prevMoveState);
-
+					return false;
 				}
+				game.unMakeMove(move, color, piece, specialMove, prevMoveState);
 			}
 		}
 		return true;
