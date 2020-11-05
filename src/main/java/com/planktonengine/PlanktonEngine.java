@@ -198,30 +198,26 @@ public class PlanktonEngine{
 		}
 		double[] pieceScores=new double[]{1, 3, 3.25, 5, 9, 10000};
 		double score=0;
-		double totalScore=0;
+		double[] totalMaterial=new double[2];
 		for(int piece=0; piece<game.piecePositions[0].length; piece++){
 			double wScore=Long.bitCount(game.piecePositions[0][piece].getBitboard())*pieceScores[piece];
 			double bScore=Long.bitCount(game.piecePositions[1][piece].getBitboard())*pieceScores[piece];
 			score+=wScore;
 			score-=bScore;
-			totalScore+=wScore+bScore;
+			if(piece!=5){
+				totalMaterial[0]+=wScore;
+				totalMaterial[1]+=bScore;
+			}
 		}
 		int[] moveCount=new int[2];
-		if(totalScore>=10){
-			for(int square=0; square<64; square++){
-				if(game.squareToColor.containsKey(square)){
-					int color=-1;
-					if(game.squareToColor.get(square)==0){
-						color=0;
-						score+=PSTables.psTables[game.squareToPiece.get(square)][square]/10;
-					}else if(game.squareToColor.get(square)==1){
-						color=1;
-						score-=PSTables.psTables[game.squareToPiece.get(square)][63-square]/10;
-					}
-					if(color!=-1){
-						moveCount[color]+=game.pieceMoves[square].getMoves().size();
-					}
+		for(int square=0; square<64; square++){
+			if(game.squareToColor.containsKey(square)){
+				if(game.squareToColor.get(square)==0 && totalMaterial[1]>=10){
+					score+=PSTables.psTables[game.squareToPiece.get(square)][square]/10;
+				}else if(game.squareToColor.get(square)==1 && totalMaterial[0]>=10){
+					score-=PSTables.psTables[game.squareToPiece.get(square)][63-square]/10;
 				}
+				moveCount[game.squareToColor.get(square)]+=game.pieceMoves[square].getMoves().size();
 			}
 		}
 		score+=moveCount[0]/100;
