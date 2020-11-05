@@ -71,9 +71,7 @@ public class Game{
 				if(move[1]>=56 || move[1]<8){
 					piecePositions[color][piece].setSquare(move[1], false);
 					piecePositions[color][4].setSquare(move[1], true);
-					squareToColor.remove(move[1]);
 					squareToPiece.remove(move[1]);
-					squareToColor.put(move[1], color);
 					squareToPiece.put(move[1], 4);
 					promotion=4;
 				}else{
@@ -165,10 +163,8 @@ public class Game{
 				if(move[1]>=56 || move[1]<8){
 					piecePositions[color][piece].setSquare(move[0], true);
 					piecePositions[color][prevMoveState.getPromotion()].setSquare(move[1], false);
-					squareToColor.remove(move[1]);
-					squareToPiece.remove(move[1]);
-					squareToColor.put(move[1], color);
-					squareToPiece.put(move[1], 0);
+					squareToPiece.remove(move[0]);
+					squareToPiece.put(move[0], 0);
 				}else{
 					if(color==0){
 						if(move[1]-move[0]==7){

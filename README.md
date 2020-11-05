@@ -8,8 +8,8 @@ To run the engine, either type `./gradlew run` to run immediately, or run `./gra
  - Minimax
  - Alpha-Beta pruning
  - Piece-Square tables
+ - Quiescence search
 
 ## Todo List
- - Quiescence Search
  - Better eval
  - Magic Bitboards

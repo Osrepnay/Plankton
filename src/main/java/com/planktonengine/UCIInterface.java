@@ -186,8 +186,8 @@ public class UCIInterface{
 					offset+=boardRows[i].charAt(newJ)-'1';
 				}else{
 					int color=Character.isUpperCase(boardRows[i].charAt(newJ)) ? 0 : 1;
-					game.piecePositions[color][pieceToInt.get(Character.toLowerCase(boardRows[i].charAt(newJ)))]
-							.setSquare(j, 7-i, true);
+					game.createPiece(color, pieceToInt.get(Character.toLowerCase(boardRows[i].charAt(newJ))),
+							new int[]{j, 7-i});
 				}
 			}
 		}

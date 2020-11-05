@@ -1,17 +1,9 @@
 package com.planktonengine;
 
-/**
- * A simple chess engine with minimax and alpha-beta pruning. Note that squares in the engine are represented by a single number, so for example a1 would be 1, b1 would be 2, and so on.
- */
 public class PlanktonEngine{
 
 	public volatile boolean keepSearching=true;
 
-	/**
-	 * @param color The color to search
-	 * @param depth The depth to search to
-	 * @return A double array of length 3 that holds the square of the piece to move, the square the piece should move to, and score of the move as evaluated by the engine, respectively.
-	 */
 	public double[] bestMove(Game game, int color, int depth){
 		double[] bestMove=new double[]{-1, -1, 0};
 		double bestMoveScore=color==0 ? Integer.MIN_VALUE : Integer.MAX_VALUE;
@@ -49,16 +41,9 @@ public class PlanktonEngine{
 		return bestMove;
 	}
 
-	/**
-	 * @param game Current state of the game
-	 * @param alpha Current alpha value
-	 * @param beta Current beta value
-	 * @param depth Depth to keep searching for
-	 * @return A double of the score the engine evaluates the position to be.
-	 */
 	public double max(Game game, double alpha, double beta, int depth){
 		if(depth<=0){
-			return eval(game);
+			return qMax(game, alpha, beta);
 		}
 		for(int square=0; square<64; square++){
 			if(!game.squareToColor.containsKey(square) || game.squareToColor.get(square)!=0){
@@ -75,10 +60,8 @@ public class PlanktonEngine{
 					continue;
 				}
 				PrevMoveGameState prevMoveState=game.makeMove(move, 0, piece, specialMove);
-
 				double moveScore=min(game, alpha, beta, depth-1);
 				game.unMakeMove(move, 0, piece, specialMove, prevMoveState);
-
 				if(moveScore>=beta){
 					return beta;
 				}
@@ -90,16 +73,9 @@ public class PlanktonEngine{
 		return alpha;
 	}
 
-	/**
-	 * @param game Current state of the game
-	 * @param alpha Current alpha value
-	 * @param beta Current beta value
-	 * @param depth Depth to keep searching for
-	 * @return A double of the score the engine evaluates the position to be.
-	 */
 	public double min(Game game, double alpha, double beta, int depth){
 		if(depth<=0){
-			return eval(game);
+			return qMin(game, alpha, beta);
 		}
 		for(int square=0; square<64; square++){
 			if(!game.squareToColor.containsKey(square) || game.squareToColor.get(square)!=1){
@@ -131,10 +107,88 @@ public class PlanktonEngine{
 		return beta;
 	}
 
-	/**
-	 * @param game Current state of the game
-	 * @return The score based purely off of the pieces, moves, and if it is checkmate.
-	 */
+	public double qMax(Game game, double alpha, double beta){
+		double standPat=eval(game);
+		if(standPat>=beta){
+			return beta;
+		}
+		if(standPat>alpha){
+			alpha=standPat;
+		}
+		for(int square=0; square<64; square++){
+			if(!game.squareToColor.containsKey(square) || game.squareToColor.get(square)!=0){
+				continue;
+			}
+			int piece=game.squareToPiece.get(square);
+			for(int moveIndex=0; moveIndex<game.pieceMoves[square].getMoves().size(); moveIndex++){
+				if(!keepSearching){
+					return Double.MAX_VALUE;
+				}
+				int[] move=new int[]{square, game.pieceMoves[square].getMove(moveIndex)};
+				boolean specialMove=game.pieceMoves[square].isSpecial(moveIndex);
+				if(!game.squareToColor.containsKey(move[1])){
+					continue;
+				}
+				if(!validMove(game, move, 0, piece, specialMove)){
+					continue;
+				}
+				PrevMoveGameState prevMoveState=game.makeMove(move, 0, piece, specialMove);
+
+				double moveScore=qMin(game, alpha, beta);
+				game.unMakeMove(move, 0, piece, specialMove, prevMoveState);
+
+				if(moveScore>=beta){
+					return beta;
+				}
+				if(moveScore>alpha){
+					alpha=moveScore;
+				}
+			}
+		}
+		return alpha;
+	}
+
+	public double qMin(Game game, double alpha, double beta){
+		double standPat=eval(game);
+		if(standPat<=alpha){
+			return alpha;
+		}
+		if(standPat<beta){
+			beta=standPat;
+		}
+		for(int square=0; square<64; square++){
+			if(!game.squareToColor.containsKey(square) || game.squareToColor.get(square)!=1){
+				continue;
+			}
+			int piece=game.squareToPiece.get(square);
+			for(int moveIndex=0; moveIndex<game.pieceMoves[square].getMoves().size(); moveIndex++){
+				if(!keepSearching){
+					return Double.MAX_VALUE;
+				}
+				int[] move=new int[]{square, game.pieceMoves[square].getMove(moveIndex)};
+				boolean specialMove=game.pieceMoves[square].isSpecial(moveIndex);
+				if(!game.squareToColor.containsKey(move[1])){
+					continue;
+				}
+				if(!validMove(game, move, 1, piece, specialMove)){
+					continue;
+				}
+				PrevMoveGameState prevMoveState=game.makeMove(move, 1, piece, specialMove);
+
+				double moveScore=qMax(game, alpha, beta);
+				game.unMakeMove(move, 1, piece, specialMove, prevMoveState);
+
+				if(moveScore<=alpha){
+					return alpha;
+				}
+				if(moveScore<beta){
+					beta=moveScore;
+				}
+			}
+		}
+		return beta;
+	}
+
 	public double eval(Game game){
 		if(inCheckmate(game, 0)){
 			return -10000;
@@ -175,14 +229,6 @@ public class PlanktonEngine{
 		return score;
 	}
 
-	/**
-	 * @param game Current state of the game
-	 * @param move Move to check
-	 * @param moveIndex Index in PieceMoves of piece of move
-	 * @param color Color to check
-	 * @param piece Piece to check
-	 * @return Returns a boolean that tells if the move is legal or not
-	 */
 	public boolean validMove(Game game, int[] move, int color, int piece, boolean specialMove){
 		if(game.squareToColor.containsKey(move[1]) && game.squareToColor.get(move[1])==color){
 			return false;
@@ -222,11 +268,6 @@ public class PlanktonEngine{
 		return true;
 	}
 
-	/**
-	 * @param game Current state of the game
-	 * @param color Color to check
-	 * @return Returns a boolean that tells whether the king of the color is in check
-	 */
 	public boolean inCheck(Game game, int color){
 		int opponentColor=color ^ 1;
 		for(int square=0; square<64; square++){
@@ -240,11 +281,6 @@ public class PlanktonEngine{
 		return false;
 	}
 
-	/**
-	 * @param game Current state of the game
-	 * @param color Color to check
-	 * @return Returns a boolean that tells whether the king of the color is checkmated
-	 */
 	public boolean inCheckmate(Game game, int color){
 		if(!inCheck(game, color)){
 			return false;
