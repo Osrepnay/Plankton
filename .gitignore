@@ -11,3 +11,6 @@ bin
 .classpath
 .project
 .settings
+
+# Error logs
+*.log
