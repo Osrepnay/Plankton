@@ -55,22 +55,8 @@ public class UCIInterface{
 						int startPos=(input[i].charAt(0)-'a')+(Character.getNumericValue(input[i].charAt(1))-1)*8;
 						int move=(input[i].charAt(2)-'a')+(Character.getNumericValue(input[i].charAt(3))-1)*8;
 						int moveColor=i%2==0 ? 1 : 0;
-						int piece=-1;
+						int piece=game.squareToPiece.get(startPos);
 						boolean special=false;
-						for(int j=0; j<game.piecePositions[0].length; j++){
-							if(game.piecePositions[0][j].getSquare(startPos)){
-								piece=j;
-								break;
-							}
-						}
-						if(piece==-1){
-							for(int j=0; j<game.piecePositions[1].length; j++){
-								if(game.piecePositions[1][j].getSquare(startPos)){
-									piece=j;
-									break;
-								}
-							}
-						}
 						if(piece==5){
 							if(Math.abs(startPos-move)==2){
 								special=true;
@@ -79,14 +65,8 @@ public class UCIInterface{
 							if((move>=0 && move<8) || (move>=56 && move<64)){
 								special=true;
 							}else{
-								if(Math.abs(startPos-move)!=8){
-									boolean enPassantExists=true;
-									for(int j=0; j<game.piecePositions[color ^ 1].length; j++){
-										if(game.piecePositions[color ^ 1][j].getSquare(move)){
-											enPassantExists=false;
-										}
-									}
-									special=special || enPassantExists;
+								if(Math.abs(startPos-move)!=8 && Math.abs(startPos-move)!=16 && !game.squareToColor.containsKey(move)){
+									special=true;
 								}
 							}
 						}
@@ -99,7 +79,8 @@ public class UCIInterface{
 								| game.piecePositions[1][a].getBitboard() | pieces.getBitboard());
 					}
 					BitboardUtility.printBoard(pieces);
-					System.out.println();
+					System.out.println(game.squareToColor);
+					System.out.println(game.squareToPiece);
 					game.setMoves();
 					break;
 				case "go":
