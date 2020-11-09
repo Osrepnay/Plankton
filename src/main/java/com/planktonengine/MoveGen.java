@@ -159,14 +159,10 @@ public class MoveGen{
 			}else{
 				switch(i*2){
 					case 0:
-						firstBlockerPosition=BitboardUtility.scanUp(maskedBlockers);
-						break;
 					case 2:
 						firstBlockerPosition=BitboardUtility.scanUp(maskedBlockers);
 						break;
 					case 4:
-						firstBlockerPosition=BitboardUtility.scanDown(maskedBlockers);
-						break;
 					case 6:
 						firstBlockerPosition=BitboardUtility.scanDown(maskedBlockers);
 						break;
