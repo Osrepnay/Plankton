@@ -14,3 +14,6 @@ bin
 
 # Error logs
 *.log
+
+#Intellij Files
+.idea
