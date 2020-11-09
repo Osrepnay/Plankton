@@ -1,10 +1,5 @@
 plugins {
     id 'java-library'
-    id 'application'
-}
-
-application {
-	mainClass='com.planktonengine.UCIInterface'
 }
 
 jar { 
