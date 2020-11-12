@@ -248,9 +248,9 @@ public class PlanktonEngine{
 		for(int square=0; square<64; square++){
 			if(game.squareToColor.containsKey(square)){
 				if(game.squareToColor.get(square)==0 && totalMaterial[1]>=10){
-					score+=PSTables.psTables[game.squareToPiece.get(square)][square]/10;
+					score+=PSTables.psTables[game.squareToPiece.get(square)][square]/15;
 				}else if(game.squareToColor.get(square)==1 && totalMaterial[0]>=10){
-					score-=PSTables.psTables[game.squareToPiece.get(square)][63-square]/10;
+					score-=PSTables.psTables[game.squareToPiece.get(square)][63-square]/15;
 				}
 				moveCount[game.squareToColor.get(square)]+=game.pieceMoves[square].getMoves().size();
 			}
@@ -264,36 +264,40 @@ public class PlanktonEngine{
 		if(game.squareToColor.containsKey(move[1]) && game.squareToColor.get(move[1])==color){
 			return false;
 		}
+		if(piece==5 && specialMove){
+			if(move[1]>move[0]){
+				//kingside
+				if(game.squareToColor.containsKey(move[0]+1)||
+						game.squareToColor.containsKey(move[0]+2)){
+					return false;
+				}
+				PrevMoveGameState midCastleState=game.makeMove(new int[]{move[0], move[0]+1}, color, piece,
+						false);
+				if(midCastleState.getCapturePiece()!=-1 || inCheck(game, color)){
+					game.unMakeMove(new int[]{move[0], move[0]+1}, color, piece, false, midCastleState);
+					return false;
+				}
+				game.unMakeMove(new int[]{move[0], move[0]+1}, color, piece, false, midCastleState);
+			}else{
+				//queenside
+				if(game.squareToColor.containsKey(move[0]-1)||
+						game.squareToColor.containsKey(move[0]-2) ||
+						game.squareToColor.containsKey(move[0]-3)){
+					return false;
+				}
+				PrevMoveGameState midCastleState=game.makeMove(new int[]{move[0], move[0]-1}, color, piece,
+						false);
+				if(midCastleState.getCapturePiece()!=-1 || inCheck(game, color)){
+					game.unMakeMove(new int[]{move[0], move[0]-1}, color, piece, false, midCastleState);
+					return false;
+				}
+				game.unMakeMove(new int[]{move[0], move[0]-1}, color, piece, false, midCastleState);
+			}
+		}
 		PrevMoveGameState prevMoveState=game.makeMove(move, color, piece, specialMove);
 		if(inCheck(game, color)){
 			game.unMakeMove(move, color, piece, specialMove, prevMoveState);
 			return false;
-		}
-		if(piece==5 && specialMove){
-			if(prevMoveState.getCapturePiece()!=-1 ||
-					(game.castleAvailable[0] && !game.piecePositions[color][3].getSquare(7)) ||
-					(game.castleAvailable[1] && !game.piecePositions[color][3].getSquare(0)) ||
-					(game.castleAvailable[2] && !game.piecePositions[color][3].getSquare(63)) ||
-					(game.castleAvailable[3] && !game.piecePositions[color][3].getSquare(56))){
-				return false;
-			}
-			if(move[1]-move[0]>0){
-				//kingside
-				PrevMoveGameState midCastleState=game.makeMove(new int[]{move[0], move[1]-1}, color, piece,
-						specialMove);
-				if(midCastleState.getCapturePiece()!=-1 || inCheck(game, color)){
-					game.unMakeMove(new int[]{move[0], move[1]-1}, color, piece, specialMove, midCastleState);
-					return false;
-				}
-			}else{
-				//queenside
-				PrevMoveGameState midCastleState=game.makeMove(new int[]{move[0], move[1]-1}, color, piece,
-						specialMove);
-				if(midCastleState.getCapturePiece()!=-1 || inCheck(game, color)){
-					game.unMakeMove(new int[]{move[0], move[1]-1}, color, piece, specialMove, midCastleState);
-					return false;
-				}
-			}
 		}
 		game.unMakeMove(move, color, piece, specialMove, prevMoveState);
 		return true;
