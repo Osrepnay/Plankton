@@ -17,7 +17,8 @@ public class UCIInterface{
 		String[] input=reader.readLine().split(" ");
 		int color=0;
 		boolean debug=false;
-		inputLoop: while(true){
+		inputLoop:
+		while(true){
 			if(debug){
 				System.out.printf("info string %s\n", input[0]);
 			}
@@ -65,7 +66,8 @@ public class UCIInterface{
 							if((move>=0 && move<8) || (move>=56 && move<64)){
 								special=true;
 							}else{
-								if(Math.abs(startPos-move)!=8 && Math.abs(startPos-move)!=16 && !game.squareToColor.containsKey(move)){
+								if(Math.abs(startPos-move)!=8 && Math.abs(
+										startPos-move)!=16 && !game.squareToColor.containsKey(move)){
 									special=true;
 								}
 							}
@@ -87,6 +89,7 @@ public class UCIInterface{
 					long[] times=new long[2];
 					long moveTime=-1;
 					boolean infinite=false;
+					int depth=-1;
 					for(int i=1; i<input.length; i+=2){
 						switch(input[i]){
 							case "wtime":
@@ -101,6 +104,8 @@ public class UCIInterface{
 							case "infinite":
 								infinite=true;
 								break;
+							case "depth":
+								depth=Integer.valueOf(input[i+1]);
 						}
 					}
 					long startTime=System.currentTimeMillis();
@@ -108,10 +113,14 @@ public class UCIInterface{
 					time+=2000;
 					double[] bestMove=new double[4];
 					engine.keepSearching=true;
-					Thread waitThread=new Thread(new TellEngineStop(time));
-					waitThread.start();
-					for(int i=1; System.currentTimeMillis()-startTime<time || infinite; i++){
+					System.out.println(depth);
+					if(!infinite && depth==-1){
+						Thread waitThread=new Thread(new TellEngineStop(time));
+						waitThread.start();
+					}
+					for(int i=1; keepGoing(i, startTime, time, infinite, depth); i++){
 						double[] bestMoveTemp=engine.bestMove(game, color, i);
+						System.out.println(Arrays.toString(bestMoveTemp));
 						if(bestMoveTemp[0]!=-1){
 							bestMove=bestMoveTemp;
 						}else{
@@ -192,6 +201,15 @@ public class UCIInterface{
 		}else{
 			game.castleAvailable=new boolean[4];
 		}
+	}
+
+	private static boolean keepGoing(int i, long startTime, long time, boolean infinite, int depth){
+		if(depth!=-1){
+			return i<=depth;
+		}else if(!infinite){
+			return System.currentTimeMillis()-startTime<time;
+		}
+		return true;
 	}
 
 	static class TellEngineStop implements Runnable{

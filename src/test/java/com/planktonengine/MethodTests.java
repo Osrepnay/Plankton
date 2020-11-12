@@ -1,10 +1,10 @@
 package com.planktonengine;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 
 import java.util.ArrayList;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 public class MethodTests{
 
@@ -23,6 +23,7 @@ public class MethodTests{
 		assertEquals(true, engine.inCheckmate(game, 1));
 	}
 
+	//TODO add move tests for all pieces
 	@Test
 	public void testMoveGen(){
 		game.blankGame();
@@ -32,10 +33,22 @@ public class MethodTests{
 		ArrayList<Integer> rightMoves=new ArrayList<>();
 		rightMoves.add(16);
 		rightMoves.add(24);
-		System.out.println(game.pieceMoves[8].getMoves());
 		boolean equals=game.pieceMoves[8].getMoves().containsAll(rightMoves)
 				&& rightMoves.containsAll(game.pieceMoves[8].getMoves());
 		assertEquals(true, equals);
+	}
+
+	@Test
+	public void testSEE(){
+		game.blankGame();
+		game.createPiece(0, 5, new int[]{0, 0});
+		game.createPiece(1, 5, new int[]{2, 0});
+		game.createPiece(1, 0, new int[]{7, 6});
+		game.createPiece(0, 3, new int[]{6, 5});
+		game.createPiece(0, 0, new int[]{5, 4});
+		game.castleAvailable=new boolean[4];
+		game.setMoves();
+		assertEquals(-4, engine.see(game, new int[]{55, 46}, false), 0.001);
 	}
 
 }

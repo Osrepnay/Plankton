@@ -15,7 +15,7 @@ public class Bitboard{
 		if(position<0 || position>=64){
 			throw new IllegalArgumentException(String.format(errorMessage, position));
 		}
-		return ((bitboard>>position) & 1)!=0;
+		return ((bitboard >> position) & 1)!=0;
 	}
 
 	public boolean getSquare(int column, int row){
@@ -25,7 +25,7 @@ public class Bitboard{
 		if(row<0 || row>=8){
 			throw new IllegalArgumentException(String.format(errorMessage, row));
 		}
-		return ((bitboard>>column+row*8) & 1)!=0;
+		return ((bitboard >> column+row*8) & 1)!=0;
 	}
 
 	public void setSquare(int position, boolean value){
@@ -33,9 +33,9 @@ public class Bitboard{
 			throw new IllegalArgumentException(String.format(errorMessage, position));
 		}
 		if(value){
-			bitboard|=(1L<<position);
+			bitboard|=(1L << position);
 		}else{
-			bitboard&=~(1L<<position);
+			bitboard&=~(1L << position);
 		}
 	}
 
@@ -47,9 +47,9 @@ public class Bitboard{
 			throw new IllegalArgumentException(String.format(errorMessage, row));
 		}
 		if(value){
-			bitboard|=(1L<<column+row*8);
+			bitboard|=(1L << column+row*8);
 		}else{
-			bitboard&=~(1L<<column+row*8);
+			bitboard&=~(1L << column+row*8);
 		}
 	}
 

@@ -1,8 +1,11 @@
 package com.planktonengine;
 
+import java.util.Arrays;
+
 public class PlanktonEngine{
 
 	public volatile boolean keepSearching=true;
+	private double[] pieceScores=new double[]{1, 3, 3.25, 5, 9, 10000};
 
 	public double[] bestMove(Game game, int color, int depth){
 		double[] bestMove=new double[]{-1, -1, 0};
@@ -14,6 +17,7 @@ public class PlanktonEngine{
 			int piece=game.squareToPiece.get(square);
 			for(int moveIndex=0; moveIndex<game.pieceMoves[square].getMoves().size(); moveIndex++){
 				if(!keepSearching){
+					System.out.println("sd");
 					return new double[]{-1, -1, 0};
 				}
 				int[] move=new int[]{square, game.pieceMoves[square].getMove(moveIndex)};
@@ -24,9 +28,9 @@ public class PlanktonEngine{
 				PrevMoveGameState prevMoveState=game.makeMove(move, color, piece, specialMove);
 				double moveScore=color==0
 						? min(game, bestMoveScore, Integer.MAX_VALUE,
-								depth-1)
+						depth-1)
 						: max(game, Integer.MIN_VALUE, bestMoveScore,
-								depth-1);
+						depth-1);
 				game.unMakeMove(move, color, piece, specialMove, prevMoveState);
 				//sign for ran out of time
 				if(moveScore==Double.MAX_VALUE){
@@ -92,10 +96,8 @@ public class PlanktonEngine{
 					continue;
 				}
 				PrevMoveGameState prevMoveState=game.makeMove(move, 1, piece, specialMove);
-
 				double moveScore=max(game, alpha, beta, depth-1);
 				game.unMakeMove(move, 1, piece, specialMove, prevMoveState);
-
 				if(moveScore<=alpha){
 					return alpha;
 				}
@@ -132,11 +134,12 @@ public class PlanktonEngine{
 				if(!validMove(game, move, 0, piece, specialMove)){
 					continue;
 				}
+				if(see(game, move, specialMove)<0){
+					continue;
+				}
 				PrevMoveGameState prevMoveState=game.makeMove(move, 0, piece, specialMove);
-
 				double moveScore=qMin(game, alpha, beta);
 				game.unMakeMove(move, 0, piece, specialMove, prevMoveState);
-
 				if(moveScore>=beta){
 					return beta;
 				}
@@ -173,11 +176,12 @@ public class PlanktonEngine{
 				if(!validMove(game, move, 1, piece, specialMove)){
 					continue;
 				}
+				if(see(game, move, specialMove)>0){
+					continue;
+				}
 				PrevMoveGameState prevMoveState=game.makeMove(move, 1, piece, specialMove);
-
 				double moveScore=qMax(game, alpha, beta);
 				game.unMakeMove(move, 1, piece, specialMove, prevMoveState);
-
 				if(moveScore<=alpha){
 					return alpha;
 				}
@@ -189,6 +193,41 @@ public class PlanktonEngine{
 		return beta;
 	}
 
+	public double see(Game game, int[] move, boolean special){
+		int color=game.squareToColor.get(move[0]);
+		int piece=game.squareToPiece.get(move[0]);
+		double score=pieceScores[game.squareToPiece.get(move[1])]*(-color*2+1);
+		int lowestAttackerSquare=-1;
+		PrevMoveGameState prevMoveState=game.makeMove(move, color, piece, special);
+		for(int square=0; square<64; square++){
+			if(game.squareToColor.containsKey(square) && game.squareToColor.get(square)!=color){
+				int moveIndex=game.pieceMoves[square].getMoves().indexOf(move[1]);
+				if(moveIndex==-1){
+					continue;
+				}
+				boolean specialMove=game.pieceMoves[square].isSpecial(moveIndex);
+				int squareColor=game.squareToColor.get(square);
+				int squarePiece=game.squareToPiece.get(square);
+				if(validMove(game, new int[]{square, move[1]}, squareColor, squarePiece, specialMove)){
+					if(lowestAttackerSquare==-1 || game.squareToPiece.get(square)<game.squareToPiece.
+							get(lowestAttackerSquare)){
+						lowestAttackerSquare=square;
+						if(game.squareToPiece.get(square)==0){
+							break;
+						}
+					}
+				}
+			}
+		}
+		if(lowestAttackerSquare!=-1){
+			int moveIndex=game.pieceMoves[lowestAttackerSquare].getMoves().indexOf(move[1]);
+			boolean specialMove=game.pieceMoves[lowestAttackerSquare].isSpecial(moveIndex);
+			score+=see(game, new int[]{lowestAttackerSquare, move[1]}, specialMove);
+		}
+		game.unMakeMove(move, color, piece, special, prevMoveState);
+		return score;
+	}
+
 	public double eval(Game game){
 		if(inCheckmate(game, 0)){
 			return -10000;
@@ -196,7 +235,6 @@ public class PlanktonEngine{
 		if(inCheckmate(game, 1)){
 			return 10000;
 		}
-		double[] pieceScores=new double[]{1, 3, 3.25, 5, 9, 10000};
 		double score=0;
 		double[] totalMaterial=new double[2];
 		for(int piece=0; piece<game.piecePositions[0].length; piece++){

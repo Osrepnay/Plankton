@@ -2,10 +2,10 @@ plugins {
     id 'java-library'
 }
 
-jar { 
-	manifest {
-		attributes 'Main-Class': 'com.planktonengine.UCIInterface'
-	}
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.planktonengine.UCIInterface'
+    }
 }
 
 repositories {
