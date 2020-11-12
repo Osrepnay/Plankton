@@ -120,7 +120,6 @@ public class UCIInterface{
 					}
 					for(int i=1; keepGoing(i, startTime, time, infinite, depth); i++){
 						double[] bestMoveTemp=engine.bestMove(game, color, i);
-						System.out.println(Arrays.toString(bestMoveTemp));
 						if(bestMoveTemp[0]!=-1){
 							bestMove=bestMoveTemp;
 						}else{

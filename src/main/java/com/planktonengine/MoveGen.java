@@ -128,16 +128,12 @@ public class MoveGen{
 			}else{
 				switch(i*2+1){
 					case 1:
+					case 7:
 						firstBlockerPosition=BitboardUtility.scanUp(maskedBlockers);
 						break;
 					case 3:
-						firstBlockerPosition=BitboardUtility.scanDown(maskedBlockers);
-						break;
 					case 5:
 						firstBlockerPosition=BitboardUtility.scanDown(maskedBlockers);
-						break;
-					case 7:
-						firstBlockerPosition=BitboardUtility.scanUp(maskedBlockers);
 						break;
 				}
 				Bitboard blockerRay=new Bitboard(~rays[firstBlockerPosition][i*2+1].getBitboard());

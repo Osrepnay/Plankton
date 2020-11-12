@@ -1,7 +1,5 @@
 package com.planktonengine;
 
-import java.util.Arrays;
-
 public class PlanktonEngine{
 
 	public volatile boolean keepSearching=true;
@@ -17,7 +15,6 @@ public class PlanktonEngine{
 			int piece=game.squareToPiece.get(square);
 			for(int moveIndex=0; moveIndex<game.pieceMoves[square].getMoves().size(); moveIndex++){
 				if(!keepSearching){
-					System.out.println("sd");
 					return new double[]{-1, -1, 0};
 				}
 				int[] move=new int[]{square, game.pieceMoves[square].getMove(moveIndex)};
