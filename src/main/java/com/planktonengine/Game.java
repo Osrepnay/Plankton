@@ -1,5 +1,6 @@
 package com.planktonengine;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class Game{
@@ -30,6 +31,7 @@ public class Game{
 		piecePositions[color][piece].setSquare(move[0], false);
 		piecePositions[color][piece].setSquare(move[1], true);
 		int promotion=-1;
+		boolean[] prevCastleAvailable=Arrays.copyOf(castleAvailable, castleAvailable.length);
 		if(piece==5){
 			castleAvailable=new boolean[4];
 			if(special){
@@ -100,7 +102,7 @@ public class Game{
 				}
 			}
 		}
-		PrevMoveGameState prevMoveState=new PrevMoveGameState(capturePiece, castleAvailable, promotion);
+		PrevMoveGameState prevMoveState=new PrevMoveGameState(capturePiece, prevCastleAvailable, promotion);
 		setMoves();
 		return prevMoveState;
 	}
@@ -268,7 +270,7 @@ public class Game{
 		}
 		squareToColor=new HashMap<>();
 		squareToPiece=new HashMap<>();
-		castleAvailable=new boolean[]{true, true, true, true};
+		castleAvailable=new boolean[4];
 		setMoves();
 	}
 
