@@ -1,7 +1,5 @@
 package com.planktonengine;
 
-import java.util.Arrays;
-
 public class PlanktonEngine{
 
 	public volatile boolean keepSearching=true;
@@ -45,6 +43,9 @@ public class PlanktonEngine{
 	}
 
 	public double max(Game game, double alpha, double beta, int depth){
+		if(gameOver(game, 0)){
+			return eval(game, 0);
+		}
 		if(depth<=0){
 			return qMax(game, alpha, beta);
 		}
@@ -77,6 +78,9 @@ public class PlanktonEngine{
 	}
 
 	public double min(Game game, double alpha, double beta, int depth){
+		if(gameOver(game, 1)){
+			return eval(game, 1);
+		}
 		if(depth<=0){
 			return qMin(game, alpha, beta);
 		}
@@ -109,7 +113,10 @@ public class PlanktonEngine{
 	}
 
 	public double qMax(Game game, double alpha, double beta){
-		double standPat=eval(game);
+		double standPat=eval(game, 0);
+		if(gameOver(game, 0)){
+			return standPat;
+		}
 		if(standPat>=beta){
 			return beta;
 		}
@@ -151,7 +158,10 @@ public class PlanktonEngine{
 	}
 
 	public double qMin(Game game, double alpha, double beta){
-		double standPat=eval(game);
+		double standPat=eval(game, 1);
+		if(gameOver(game, 1)){
+			return standPat;
+		}
 		if(standPat<=alpha){
 			return alpha;
 		}
@@ -227,7 +237,10 @@ public class PlanktonEngine{
 		return score;
 	}
 
-	public double eval(Game game){
+	public double eval(Game game, int color){
+		if(inStalemate(game, color)){
+			return 0;
+		}
 		if(inCheckmate(game, 0)){
 			return -10000;
 		}
@@ -257,8 +270,8 @@ public class PlanktonEngine{
 				moveCount[game.squareToColor.get(square)]+=game.pieceMoves[square].getMoves().size();
 			}
 		}
-		score+=moveCount[0]/100;
-		score-=moveCount[1]/100;
+		score+=moveCount[0]/100d;
+		score-=moveCount[1]/100d;
 		return score;
 	}
 
@@ -305,6 +318,11 @@ public class PlanktonEngine{
 		return true;
 	}
 
+	public boolean gameOver(Game game, int color){
+		//Doesn't account for checkmates on the other side, but shouldn't be a problem with the current use case
+		return inStalemate(game, color) || inCheckmate(game, color);
+	}
+
 	public boolean inCheck(Game game, int color){
 		int opponentColor=color ^ 1;
 		for(int square=0; square<64; square++){
@@ -339,6 +357,27 @@ public class PlanktonEngine{
 					return false;
 				}
 				game.unMakeMove(move, color, piece, specialMove, prevMoveState);
+			}
+		}
+		return true;
+	}
+
+	public boolean inStalemate(Game game, int color){
+		if(inCheck(game, color)){
+			return false;
+		}
+		for(int square=0; square<64; square++){
+			if(!game.squareToColor.containsKey(square) || game.squareToColor.get(square)!=color){
+				continue;
+			}
+			int piece=game.squareToPiece.get(square);
+			for(int moveIndex=0; moveIndex<game.pieceMoves[square].getMoves().size(); moveIndex++){
+				int[] move=new int[]{square, game.pieceMoves[square].getMove(moveIndex)};
+				boolean specialMove=game.pieceMoves[square].isSpecial(moveIndex);
+				if(!validMove(game, move, color, piece, specialMove)){
+					continue;
+				}
+				return false;
 			}
 		}
 		return true;

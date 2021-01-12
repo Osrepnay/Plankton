@@ -24,6 +24,21 @@ public class PositionalTest{
 	}
 
 	@Test
+	public void testStalemates(){
+		//choice between material and stalemate or keep playing
+		game.blankGame();
+		game.createPiece(1, 5, new int[]{0, 0});
+		game.createPiece(1, 2, new int[]{2, 1});
+		game.createPiece(0, 4, new int[]{3, 1});
+		game.createPiece(0, 5, new int[]{7, 7});
+		game.castleAvailable=new boolean[4];
+		game.setMoves();
+		double[] bestMove=engine.bestMove(game, 0, 1);
+		//assertArrayNotEquals?
+		Assert.assertFalse(Arrays.equals(new int[]{(int)bestMove[0], (int)bestMove[1]}, new int[]{11, 10}));
+	}
+
+	@Test
 	public void testMaterialGain(){
 		//queen fork
 		game.blankGame();
