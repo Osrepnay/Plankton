@@ -80,9 +80,6 @@ public class UCIInterface{
 						pieces=new Bitboard(game.piecePositions[0][a].getBitboard()
 								| game.piecePositions[1][a].getBitboard() | pieces.getBitboard());
 					}
-					BitboardUtility.printBoard(pieces);
-					System.out.println(game.squareToColor);
-					System.out.println(game.squareToPiece);
 					game.setMoves();
 					break;
 				case "go":
@@ -110,10 +107,13 @@ public class UCIInterface{
 					}
 					long startTime=System.currentTimeMillis();
 					long time=moveTime==-1 ? (color==0 ? times[0]/30 : times[1]/30) : moveTime;
-					time+=2000;
+					time+=1000;
+					//Prevent taking too long on long time controls
+					if(time>15000){
+						time=15000;
+					}
 					double[] bestMove=new double[4];
 					engine.keepSearching=true;
-					System.out.println(depth);
 					if(!infinite && depth==-1){
 						Thread waitThread=new Thread(new TellEngineStop(time));
 						waitThread.start();
