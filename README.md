@@ -1,3 +1,4 @@
+![PlanktonEngine logo](logo.png)
 # Plankton Engine
 A simple Java engine that uses the UCI protocol.
 
