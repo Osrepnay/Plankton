@@ -1,44 +1,38 @@
 package com.planktonengine;
 
-public class BitboardUtility{
+import java.util.ArrayList;
+import java.util.List;
 
-	private BitboardUtility(){
+public class BitboardUtility {
+
+	private BitboardUtility() {
 		throw new IllegalStateException("Utility class cannot be instantiated.");
 	}
 
-	public static int scanDown(Bitboard board){
-		return 63-Long.numberOfLeadingZeros(board.getBitboard());
+	public static int scanDown(Bitboard board) {
+		return 63 - Long.numberOfLeadingZeros(board.getBitboard());
 	}
 
-	public static int scanUp(Bitboard board){
+	public static int scanUp(Bitboard board) {
 		return Long.numberOfTrailingZeros(board.getBitboard());
 	}
 
-	public static PieceMoves bitboardToPieceMoves(Bitboard board){
-		PieceMoves pieceMoves=new PieceMoves();
-		for(int i=0; i<64; i++){
-			if(board.getSquare(i)){
-				pieceMoves.addMove(i);
+	public static List<PieceMove> bitboardToPieceMoves(int start, Bitboard board) {
+		List<PieceMove> pieceMoves = new ArrayList<>();
+		for(int i = 0; i < 64; i++) {
+			if(board.getSquare(i)) {
+				pieceMoves.add(new PieceMove(start, i, SpecialMove.NONE));
 			}
 		}
 		return pieceMoves;
 	}
 
-	public static Bitboard pieceMovesToBitboard(PieceMoves pieceMoves){
-		Bitboard board=new Bitboard();
-		for(int square : pieceMoves.getMoves()){
-			board.setSquare(square, true);
+	public static Bitboard pieceMovesToBitboard(List<PieceMove> pieceMoves) {
+		Bitboard board = new Bitboard();
+		for(PieceMove square : pieceMoves) {
+			board.setSquare(square.end, true);
 		}
 		return board;
-	}
-
-	public static void printBoard(Bitboard board){
-		for(int i=7; i>=0; i--){
-			for(int j=0; j<8; j++){
-				System.out.print(board.getSquare(j, i) ? "0 " : "- ");
-			}
-			System.out.println();
-		}
 	}
 
 }

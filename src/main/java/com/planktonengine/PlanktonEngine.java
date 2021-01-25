@@ -1,334 +1,320 @@
 package com.planktonengine;
 
-public class PlanktonEngine{
+public class PlanktonEngine {
 
-	public volatile boolean keepSearching=true;
-	private double[] pieceScores=new double[]{1, 3, 3.25, 5, 9, 10000};
+	public volatile boolean keepSearching = true;
+	private double[] pieceScores = new double[] {1, 3, 3.25, 5, 9, 10000};
 
-	public double[] bestMove(Game game, int color, int depth){
-		double[] bestMove=new double[]{-1, -1, 0};
-		double bestMoveScore=color==0 ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-		for(int square=0; square<64; square++){
-			if(!game.squareToColor.containsKey(square) || game.squareToColor.get(square)!=color){
+	public double[] bestMove(Game game, int color, int depth) {
+		double[] bestMove = new double[] {-1, -1, 0};
+		double bestMoveScore = color == 0 ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+		for(int square = 0; square < 64; square++) {
+			if(!game.pieceExists(square) || game.colorOfSquare(square) != color) {
 				continue;
 			}
-			int piece=game.squareToPiece.get(square);
-			for(int moveIndex=0; moveIndex<game.pieceMoves[square].getMoves().size(); moveIndex++){
-				if(!keepSearching){
-					return new double[]{-1, -1, 0};
+			int piece = game.pieceOfSquare(square);
+			for(PieceMove move : game.pieceMovesFromSquare(square)) {
+				if(!keepSearching) {
+					return new double[] {-1, -1, 0};
 				}
-				int[] move=new int[]{square, game.pieceMoves[square].getMove(moveIndex)};
-				boolean specialMove=game.pieceMoves[square].isSpecial(moveIndex);
-				if(!validMove(game, move, color, piece, specialMove)){
+				if(!validMove(game, move, color, piece)) {
 					continue;
 				}
-				PrevMoveGameState prevMoveState=game.makeMove(move, color, piece, specialMove);
-				double moveScore=color==0
+				PrevMoveGameState prevMoveState = game.makeMove(move, color, piece);
+				double moveScore = color == 0
 						? min(game, bestMoveScore, Integer.MAX_VALUE,
-						depth-1)
+						depth - 1)
 						: max(game, Integer.MIN_VALUE, bestMoveScore,
-						depth-1);
-				game.unMakeMove(move, color, piece, specialMove, prevMoveState);
+						depth - 1);
+				game.unMakeMove(move, color, piece, prevMoveState);
 				//sign for ran out of time
-				if(moveScore==Double.MAX_VALUE){
-					return new double[]{-1, -1, 0};
+				if(moveScore == Double.MAX_VALUE) {
+					return new double[] {-1, -1, 0};
 				}
-				if(color==0 ? moveScore>bestMoveScore : moveScore<bestMoveScore){
-					bestMoveScore=moveScore;
-					bestMove=new double[]{move[0], move[1], bestMoveScore};
+				if(color == 0 ? moveScore > bestMoveScore : moveScore < bestMoveScore) {
+					bestMoveScore = moveScore;
+					bestMove = new double[] {move.start, move.end, bestMoveScore};
 				}
 			}
 		}
 		return bestMove;
 	}
 
-	public double max(Game game, double alpha, double beta, int depth){
-		if(gameOver(game, 0)){
+	public double max(Game game, double alpha, double beta, int depth) {
+		if(gameOver(game, 0)) {
 			return eval(game, 0);
 		}
-		if(depth<=0){
+		if(depth <= 0) {
 			return qMax(game, alpha, beta);
 		}
-		for(int square=0; square<64; square++){
-			if(!game.squareToColor.containsKey(square) || game.squareToColor.get(square)!=0){
+		for(int square = 0; square < 64; square++) {
+			if(!game.pieceExists(square) || game.colorOfSquare(square) != 0) {
 				continue;
 			}
-			int piece=game.squareToPiece.get(square);
-			for(int moveIndex=0; moveIndex<game.pieceMoves[square].getMoves().size(); moveIndex++){
-				if(!keepSearching){
+			int piece = game.pieceOfSquare(square);
+			for(PieceMove move : game.pieceMovesFromSquare(square)) {
+				if(!keepSearching) {
 					return Double.MAX_VALUE;
 				}
-				int[] move=new int[]{square, game.pieceMoves[square].getMove(moveIndex)};
-				boolean specialMove=game.pieceMoves[square].isSpecial(moveIndex);
-				if(!validMove(game, move, 0, piece, specialMove)){
+				if(!validMove(game, move, 0, piece)) {
 					continue;
 				}
-				PrevMoveGameState prevMoveState=game.makeMove(move, 0, piece, specialMove);
-				double moveScore=min(game, alpha, beta, depth-1);
-				game.unMakeMove(move, 0, piece, specialMove, prevMoveState);
-				if(moveScore>=beta){
+				PrevMoveGameState prevMoveState = game.makeMove(move, 0, piece);
+				double moveScore = min(game, alpha, beta, depth - 1);
+				game.unMakeMove(move, 0, piece, prevMoveState);
+				if(moveScore >= beta) {
 					return beta;
 				}
-				if(moveScore>alpha){
-					alpha=moveScore;
+				if(moveScore > alpha) {
+					alpha = moveScore;
 				}
 			}
 		}
 		return alpha;
 	}
 
-	public double min(Game game, double alpha, double beta, int depth){
-		if(gameOver(game, 1)){
+	public double min(Game game, double alpha, double beta, int depth) {
+		if(gameOver(game, 1)) {
 			return eval(game, 1);
 		}
-		if(depth<=0){
+		if(depth <= 0) {
 			return qMin(game, alpha, beta);
 		}
-		for(int square=0; square<64; square++){
-			if(!game.squareToColor.containsKey(square) || game.squareToColor.get(square)!=1){
+		for(int square = 0; square < 64; square++) {
+			if(!game.pieceExists(square) || game.colorOfSquare(square) != 1) {
 				continue;
 			}
-			int piece=game.squareToPiece.get(square);
-			for(int moveIndex=0; moveIndex<game.pieceMoves[square].getMoves().size(); moveIndex++){
-				if(!keepSearching){
+			int piece = game.pieceOfSquare(square);
+			for(PieceMove move : game.pieceMovesFromSquare(square)) {
+				if(!keepSearching) {
 					return Double.MAX_VALUE;
 				}
-				int[] move=new int[]{square, game.pieceMoves[square].getMove(moveIndex)};
-				boolean specialMove=game.pieceMoves[square].isSpecial(moveIndex);
-				if(!validMove(game, move, 1, piece, specialMove)){
+				if(!validMove(game, move, 1, piece)) {
 					continue;
 				}
-				PrevMoveGameState prevMoveState=game.makeMove(move, 1, piece, specialMove);
-				double moveScore=max(game, alpha, beta, depth-1);
-				game.unMakeMove(move, 1, piece, specialMove, prevMoveState);
-				if(moveScore<=alpha){
+				PrevMoveGameState prevMoveState = game.makeMove(move, 1, piece);
+				double moveScore = max(game, alpha, beta, depth - 1);
+				game.unMakeMove(move, 1, piece, prevMoveState);
+				if(moveScore <= alpha) {
 					return alpha;
 				}
-				if(moveScore<beta){
-					beta=moveScore;
+				if(moveScore < beta) {
+					beta = moveScore;
 				}
 			}
 		}
 		return beta;
 	}
 
-	public double qMax(Game game, double alpha, double beta){
-		double standPat=eval(game, 0);
-		if(gameOver(game, 0)){
+	public double qMax(Game game, double alpha, double beta) {
+		double standPat = eval(game, 0);
+		if(gameOver(game, 0)) {
 			return standPat;
 		}
-		if(standPat>=beta){
+		if(standPat >= beta) {
 			return beta;
 		}
-		if(standPat>alpha){
-			alpha=standPat;
+		if(standPat > alpha) {
+			alpha = standPat;
 		}
-		for(int square=0; square<64; square++){
-			if(!game.squareToColor.containsKey(square) || game.squareToColor.get(square)!=0){
+		for(int square = 0; square < 64; square++) {
+			if(!game.pieceExists(square) || game.colorOfSquare(square) != 0) {
 				continue;
 			}
-			int piece=game.squareToPiece.get(square);
-			for(int moveIndex=0; moveIndex<game.pieceMoves[square].getMoves().size(); moveIndex++){
-				if(!keepSearching){
+			int piece = game.pieceOfSquare(square);
+			for(PieceMove move : game.pieceMovesFromSquare(square)) {
+				if(!keepSearching) {
 					return Double.MAX_VALUE;
 				}
-				int[] move=new int[]{square, game.pieceMoves[square].getMove(moveIndex)};
-				boolean specialMove=game.pieceMoves[square].isSpecial(moveIndex);
-				if(!game.squareToColor.containsKey(move[1])){
+				if(!game.pieceExists(move.end)) {
 					continue;
 				}
-				if(!validMove(game, move, 0, piece, specialMove)){
+				if(!validMove(game, move, 0, piece)) {
 					continue;
 				}
-				if(see(game, move, specialMove)<0){
+				if(see(game, move) < 0) {
 					continue;
 				}
-				PrevMoveGameState prevMoveState=game.makeMove(move, 0, piece, specialMove);
-				double moveScore=qMin(game, alpha, beta);
-				game.unMakeMove(move, 0, piece, specialMove, prevMoveState);
-				if(moveScore>=beta){
+				PrevMoveGameState prevMoveState = game.makeMove(move, 0, piece);
+				double moveScore = qMin(game, alpha, beta);
+				game.unMakeMove(move, 0, piece, prevMoveState);
+				if(moveScore >= beta) {
 					return beta;
 				}
-				if(moveScore>alpha){
-					alpha=moveScore;
+				if(moveScore > alpha) {
+					alpha = moveScore;
 				}
 			}
 		}
 		return alpha;
 	}
 
-	public double qMin(Game game, double alpha, double beta){
-		double standPat=eval(game, 1);
-		if(gameOver(game, 1)){
+	public double qMin(Game game, double alpha, double beta) {
+		double standPat = eval(game, 1);
+		if(gameOver(game, 1)) {
 			return standPat;
 		}
-		if(standPat<=alpha){
+		if(standPat <= alpha) {
 			return alpha;
 		}
-		if(standPat<beta){
-			beta=standPat;
+		if(standPat < beta) {
+			beta = standPat;
 		}
-		for(int square=0; square<64; square++){
-			if(!game.squareToColor.containsKey(square) || game.squareToColor.get(square)!=1){
+		for(int square = 0; square < 64; square++) {
+			if(!game.pieceExists(square) || game.colorOfSquare(square) != 1) {
 				continue;
 			}
-			int piece=game.squareToPiece.get(square);
-			for(int moveIndex=0; moveIndex<game.pieceMoves[square].getMoves().size(); moveIndex++){
-				if(!keepSearching){
+			int piece = game.pieceOfSquare(square);
+			for(PieceMove move : game.pieceMovesFromSquare(square)) {
+				if(!keepSearching) {
 					return Double.MAX_VALUE;
 				}
-				int[] move=new int[]{square, game.pieceMoves[square].getMove(moveIndex)};
-				boolean specialMove=game.pieceMoves[square].isSpecial(moveIndex);
-				if(!game.squareToColor.containsKey(move[1])){
+				if(!game.pieceExists(move.end)) {
 					continue;
 				}
-				if(!validMove(game, move, 1, piece, specialMove)){
+				if(!validMove(game, move, 1, piece)) {
 					continue;
 				}
-				if(see(game, move, specialMove)>0){
+				if(see(game, move) > 0) {
 					continue;
 				}
-				PrevMoveGameState prevMoveState=game.makeMove(move, 1, piece, specialMove);
-				double moveScore=qMax(game, alpha, beta);
-				game.unMakeMove(move, 1, piece, specialMove, prevMoveState);
-				if(moveScore<=alpha){
+				PrevMoveGameState prevMoveState = game.makeMove(move, 1, piece);
+				double moveScore = qMax(game, alpha, beta);
+				game.unMakeMove(move, 1, piece, prevMoveState);
+				if(moveScore <= alpha) {
 					return alpha;
 				}
-				if(moveScore<beta){
-					beta=moveScore;
+				if(moveScore < beta) {
+					beta = moveScore;
 				}
 			}
 		}
 		return beta;
 	}
 
-	public double see(Game game, int[] move, boolean special){
-		int color=game.squareToColor.get(move[0]);
-		int piece=game.squareToPiece.get(move[0]);
-		double score=pieceScores[game.squareToPiece.get(move[1])]*(-color*2+1);
-		int lowestAttackerSquare=-1;
-		PrevMoveGameState prevMoveState=game.makeMove(move, color, piece, special);
-		for(int square=0; square<64; square++){
-			if(game.squareToColor.containsKey(square) && game.squareToColor.get(square)!=color){
-				int moveIndex=game.pieceMoves[square].getMoves().indexOf(move[1]);
-				if(moveIndex==-1){
+	public double see(Game game, PieceMove move) {
+		int color = game.colorOfSquare(move.start);
+		int piece = game.pieceOfSquare(move.start);
+		double score = pieceScores[game.pieceOfSquare(move.end)] * (-color * 2 + 1);
+		int lowestAttackerSquare = -1;
+		PrevMoveGameState prevMoveState = game.makeMove(move, color, piece);
+		for(int square = 0; square < 64; square++) {
+			if(game.pieceExists(square) && game.colorOfSquare(square) != color) {
+				PieceMove capture = new PieceMove(square, move.end, SpecialMove.NONE);
+				int moveIndex = game.pieceMovesFromSquare(square).indexOf(capture);
+				if(moveIndex == -1) {
 					continue;
 				}
-				boolean specialMove=game.pieceMoves[square].isSpecial(moveIndex);
-				int squareColor=game.squareToColor.get(square);
-				int squarePiece=game.squareToPiece.get(square);
-				if(validMove(game, new int[]{square, move[1]}, squareColor, squarePiece, specialMove)){
-					if(lowestAttackerSquare==-1 || game.squareToPiece.get(square)<game.squareToPiece.
-							get(lowestAttackerSquare)){
-						lowestAttackerSquare=square;
-						if(game.squareToPiece.get(square)==0){
+				int squareColor = game.colorOfSquare(square);
+				int squarePiece = game.pieceOfSquare(square);
+				if(validMove(game, capture, squareColor, squarePiece)) {
+					if(lowestAttackerSquare == -1 || squarePiece < game.pieceOfSquare(lowestAttackerSquare)) {
+						lowestAttackerSquare = square;
+						if(squarePiece == 0) {
 							break;
 						}
 					}
 				}
 			}
 		}
-		if(lowestAttackerSquare!=-1){
-			int moveIndex=game.pieceMoves[lowestAttackerSquare].getMoves().indexOf(move[1]);
-			boolean specialMove=game.pieceMoves[lowestAttackerSquare].isSpecial(moveIndex);
-			score+=see(game, new int[]{lowestAttackerSquare, move[1]}, specialMove);
+		if(lowestAttackerSquare != -1) {
+			//TODO store move index
+			PieceMove capture = new PieceMove(lowestAttackerSquare, move.end, SpecialMove.NONE);
+			score += see(game, capture);
 		}
-		game.unMakeMove(move, color, piece, special, prevMoveState);
+		game.unMakeMove(move, color, piece, prevMoveState);
 		return score;
 	}
 
-	public double eval(Game game, int color){
-		if(inStalemate(game, color)){
+	public double eval(Game game, int color) {
+		if(inStalemate(game, color)) {
 			return 0;
 		}
-		if(inCheckmate(game, 0)){
+		if(inCheckmate(game, 0)) {
 			return -10000;
 		}
-		if(inCheckmate(game, 1)){
+		if(inCheckmate(game, 1)) {
 			return 10000;
 		}
-		double score=0;
-		double[] totalMaterial=new double[2];
-		for(int piece=0; piece<game.piecePositions[0].length; piece++){
-			double wScore=Long.bitCount(game.piecePositions[0][piece].getBitboard())*pieceScores[piece];
-			double bScore=Long.bitCount(game.piecePositions[1][piece].getBitboard())*pieceScores[piece];
-			score+=wScore;
-			score-=bScore;
-			if(piece!=5){
-				totalMaterial[0]+=wScore;
-				totalMaterial[1]+=bScore;
+		double score = 0;
+		double[] totalMaterial = new double[2];
+		for(int piece = 0; piece < game.piecePositionsFromColor(0).length; piece++) {
+			double wScore = Long.bitCount(game.piecePositions(0, piece).getBitboard()) * pieceScores[piece];
+			double bScore = Long.bitCount(game.piecePositions(1, piece).getBitboard()) * pieceScores[piece];
+			score += wScore;
+			score -= bScore;
+			if(piece != 5) {
+				totalMaterial[0] += wScore;
+				totalMaterial[1] += bScore;
 			}
 		}
-		int[] moveCount=new int[2];
-		for(int square=0; square<64; square++){
-			if(game.squareToColor.containsKey(square)){
-				if(game.squareToColor.get(square)==0 && totalMaterial[1]>=10){
-					score+=PSTables.psTables[game.squareToPiece.get(square)][square]/15;
-				}else if(game.squareToColor.get(square)==1 && totalMaterial[0]>=10){
-					score-=PSTables.psTables[game.squareToPiece.get(square)][63-square]/15;
+		int[] moveCount = new int[2];
+		for(int square = 0; square < 64; square++) {
+			if(game.pieceExists(square)) {
+				if(game.colorOfSquare(square) == 0 && totalMaterial[1] >= 10) {
+					score += PSTables.psTables[game.pieceOfSquare(square)][square] / 15;
+				} else if(game.colorOfSquare(square) == 1 && totalMaterial[0] >= 10) {
+					score -= PSTables.psTables[game.pieceOfSquare(square)][63 - square] / 15;
 				}
-				moveCount[game.squareToColor.get(square)]+=game.pieceMoves[square].getMoves().size();
+				moveCount[game.colorOfSquare(square)] += game.pieceMovesFromSquare(square).size();
 			}
 		}
-		score+=moveCount[0]/100d;
-		score-=moveCount[1]/100d;
+		score += moveCount[0] / 100d;
+		score -= moveCount[1] / 100d;
 		return score;
 	}
 
-	public boolean validMove(Game game, int[] move, int color, int piece, boolean specialMove){
-		if(game.squareToColor.containsKey(move[1]) && game.squareToColor.get(move[1])==color){
+	public boolean validMove(Game game, PieceMove move, int color, int piece) {
+		if(game.pieceExists(move.end) && game.colorOfSquare(move.end) == color) {
 			return false;
 		}
-		if(piece==5 && specialMove){
-			if(move[1]>move[0]){
-				//kingside
-				if(game.squareToColor.containsKey(move[0]+1)||
-						game.squareToColor.containsKey(move[0]+2)){
-					return false;
-				}
-				PrevMoveGameState midCastleState=game.makeMove(new int[]{move[0], move[0]+1}, color, piece,
-						false);
-				if(midCastleState.getCapturePiece()!=-1 || inCheck(game, color)){
-					game.unMakeMove(new int[]{move[0], move[0]+1}, color, piece, false, midCastleState);
-					return false;
-				}
-				game.unMakeMove(new int[]{move[0], move[0]+1}, color, piece, false, midCastleState);
-			}else{
-				//queenside
-				if(game.squareToColor.containsKey(move[0]-1)||
-						game.squareToColor.containsKey(move[0]-2) ||
-						game.squareToColor.containsKey(move[0]-3)){
-					return false;
-				}
-				PrevMoveGameState midCastleState=game.makeMove(new int[]{move[0], move[0]-1}, color, piece,
-						false);
-				if(midCastleState.getCapturePiece()!=-1 || inCheck(game, color)){
-					game.unMakeMove(new int[]{move[0], move[0]-1}, color, piece, false, midCastleState);
-					return false;
-				}
-				game.unMakeMove(new int[]{move[0], move[0]-1}, color, piece, false, midCastleState);
+		if(move.special == SpecialMove.CASTLE_KINGSIDE) {
+			//kingside
+			if(game.pieceExists(move.start + 1) || game.pieceExists(move.start + 2)) {
+				return false;
 			}
+			PieceMove midCastleStateMove = new PieceMove(move.start, move.start + 1, SpecialMove.NONE);
+			PrevMoveGameState midCastleState = game.makeMove(midCastleStateMove, color, piece);
+			if(midCastleState.getCapturePiece() != -1 || inCheck(game, color)) {
+				game.unMakeMove(midCastleStateMove, color, piece, midCastleState);
+				return false;
+			}
+			game.unMakeMove(midCastleStateMove, color, piece, midCastleState);
+		} else if(move.special == SpecialMove.CASTLE_QUEENSIDE) {
+			//queenside
+			if(game.pieceExists(move.start - 1) ||
+					game.pieceExists(move.start - 2) ||
+					game.pieceExists(move.start - 3)) {
+				return false;
+			}
+			PieceMove midCastleStateMove = new PieceMove(move.start, move.start - 1, SpecialMove.NONE);
+			PrevMoveGameState midCastleState = game.makeMove(midCastleStateMove, color, piece);
+			if(midCastleState.getCapturePiece() != -1 || inCheck(game, color)) {
+				game.unMakeMove(midCastleStateMove, color, piece, midCastleState);
+				return false;
+			}
+			game.unMakeMove(midCastleStateMove, color, piece, midCastleState);
 		}
-		PrevMoveGameState prevMoveState=game.makeMove(move, color, piece, specialMove);
-		if(inCheck(game, color)){
-			game.unMakeMove(move, color, piece, specialMove, prevMoveState);
+		PrevMoveGameState prevMoveState = game.makeMove(move, color, piece);
+		if(inCheck(game, color)) {
+			game.unMakeMove(move, color, piece, prevMoveState);
 			return false;
 		}
-		game.unMakeMove(move, color, piece, specialMove, prevMoveState);
+		game.unMakeMove(move, color, piece, prevMoveState);
 		return true;
 	}
 
-	public boolean gameOver(Game game, int color){
+	public boolean gameOver(Game game, int color) {
 		//Doesn't account for checkmates on the other side, but shouldn't be a problem with the current use case
 		return inStalemate(game, color) || inCheckmate(game, color);
 	}
 
-	public boolean inCheck(Game game, int color){
-		int opponentColor=color ^ 1;
-		for(int square=0; square<64; square++){
-			if(game.squareToColor.containsKey(square) && game.squareToColor.get(square)==opponentColor){
-				if((BitboardUtility.pieceMovesToBitboard(game.pieceMoves[square]).getBitboard()
-						& game.piecePositions[color][5].getBitboard())!=0){
+	public boolean inCheck(Game game, int color) {
+		int opponentColor = color ^ 1;
+		for(int square = 0; square < 64; square++) {
+			if(game.pieceExists(square) && game.colorOfSquare(square) == opponentColor) {
+				if((BitboardUtility.pieceMovesToBitboard(game.pieceMovesFromSquare(square)).getBitboard()
+						& game.piecePositions(color, 5).getBitboard()) != 0) {
 					return true;
 				}
 			}
@@ -336,45 +322,41 @@ public class PlanktonEngine{
 		return false;
 	}
 
-	public boolean inCheckmate(Game game, int color){
-		if(!inCheck(game, color)){
+	public boolean inCheckmate(Game game, int color) {
+		if(!inCheck(game, color)) {
 			return false;
 		}
-		for(int square=0; square<64; square++){
-			if(!game.squareToColor.containsKey(square) || game.squareToColor.get(square)!=color){
+		for(int square = 0; square < 64; square++) {
+			if(!game.pieceExists(square) || game.colorOfSquare(square) != color) {
 				continue;
 			}
-			int piece=game.squareToPiece.get(square);
-			for(int moveIndex=0; moveIndex<game.pieceMoves[square].getMoves().size(); moveIndex++){
-				int[] move=new int[]{square, game.pieceMoves[square].getMove(moveIndex)};
-				boolean specialMove=game.pieceMoves[square].isSpecial(moveIndex);
-				if(!validMove(game, move, color, piece, specialMove)){
+			int piece = game.pieceOfSquare(square);
+			for(PieceMove move : game.pieceMovesFromSquare(square)) {
+				if(!validMove(game, move, color, piece)) {
 					continue;
 				}
-				PrevMoveGameState prevMoveState=game.makeMove(move, color, piece, specialMove);
-				if(!inCheck(game, color)){
-					game.unMakeMove(move, color, piece, specialMove, prevMoveState);
+				PrevMoveGameState prevMoveState = game.makeMove(move, color, piece);
+				if(!inCheck(game, color)) {
+					game.unMakeMove(move, color, piece, prevMoveState);
 					return false;
 				}
-				game.unMakeMove(move, color, piece, specialMove, prevMoveState);
+				game.unMakeMove(move, color, piece, prevMoveState);
 			}
 		}
 		return true;
 	}
 
-	public boolean inStalemate(Game game, int color){
-		if(inCheck(game, color)){
+	public boolean inStalemate(Game game, int color) {
+		if(inCheck(game, color)) {
 			return false;
 		}
-		for(int square=0; square<64; square++){
-			if(!game.squareToColor.containsKey(square) || game.squareToColor.get(square)!=color){
+		for(int square = 0; square < 64; square++) {
+			if(!game.pieceExists(square) || game.colorOfSquare(square) != color) {
 				continue;
 			}
-			int piece=game.squareToPiece.get(square);
-			for(int moveIndex=0; moveIndex<game.pieceMoves[square].getMoves().size(); moveIndex++){
-				int[] move=new int[]{square, game.pieceMoves[square].getMove(moveIndex)};
-				boolean specialMove=game.pieceMoves[square].isSpecial(moveIndex);
-				if(!validMove(game, move, color, piece, specialMove)){
+			int piece = game.pieceOfSquare(square);
+			for(PieceMove move : game.pieceMovesFromSquare(square)) {
+				if(!validMove(game, move, color, piece)) {
 					continue;
 				}
 				return false;

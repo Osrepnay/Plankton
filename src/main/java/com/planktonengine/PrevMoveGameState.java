@@ -1,6 +1,7 @@
 package com.planktonengine;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Stores some stuff that {@link Game#unMakeMove} uses to restore the previous position
@@ -9,12 +10,10 @@ public class PrevMoveGameState{
 
 	private int capturePiece;
 	private boolean[] castleAvailable;
-	private int promotion;
 
-	public PrevMoveGameState(int capturePiece, boolean[] castleAvailable, int promotion){
+	public PrevMoveGameState(int capturePiece, boolean[] castleAvailable){
 		this.capturePiece=capturePiece;
 		this.castleAvailable=Arrays.copyOf(castleAvailable, castleAvailable.length);
-		this.promotion=promotion;
 	}
 
 	public int getCapturePiece(){
@@ -25,7 +24,26 @@ public class PrevMoveGameState{
 		return castleAvailable;
 	}
 
-	public int getPromotion(){
-		return promotion;
+	@Override
+	public boolean equals(Object o) {
+		if(this == o)
+			return true;
+		if(o == null || getClass() != o.getClass())
+			return false;
+		PrevMoveGameState that = (PrevMoveGameState)o;
+		return capturePiece == that.capturePiece && Arrays.equals(castleAvailable, that.castleAvailable);
 	}
+
+	@Override
+	public int hashCode() {
+		int result = Objects.hash(capturePiece);
+		result = 31 * result + Arrays.hashCode(castleAvailable);
+		return result;
+	}
+
+	@Override
+	public String toString() {
+		return "Piece captured: " + capturePiece + ", Castles available: " + Arrays.toString(castleAvailable);
+	}
+
 }
