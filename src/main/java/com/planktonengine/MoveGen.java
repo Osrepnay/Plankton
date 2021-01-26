@@ -122,15 +122,13 @@ public class MoveGen {
 			}
 		}
 		if(position + posChange + 1 >= 0 && position + posChange + 1 < 64 && blockers.getSquare(
-				position + posChange + 1)
-				&& (position + 1) % 8 != 0) {
+				position + posChange + 1) && (position + 1) % 8 != 0) {
 			for(SpecialMove promotion : promotions) {
 				pieceMoves.add(new PieceMove(position, position + posChange + 1, promotion));
 			}
 		}
 		if(position + posChange - 1 >= 0 && position + posChange - 1 < 64 && blockers.getSquare(
-				position + posChange - 1)
-				&& position % 8 != 0) {
+				position + posChange - 1) && position % 8 != 0) {
 			for(SpecialMove promotion : promotions) {
 				pieceMoves.add(new PieceMove(position, position + posChange - 1, promotion));
 			}
@@ -197,7 +195,7 @@ public class MoveGen {
 		if(castleAvailable[color * 2] && !blockers.getSquare(position + 1) && !blockers.getSquare(position + 2)) {
 			moves.add(new PieceMove(position, position + 2, SpecialMove.CASTLE_KINGSIDE));
 		}
-		if(castleAvailable[color * 2 + 1] && !blockers.getSquare(position + 1) && !blockers.getSquare(position + 2)) {
+		if(castleAvailable[color * 2 + 1] && !blockers.getSquare(position - 1) && !blockers.getSquare(position - 2) && !blockers.getSquare(position - 3)) {
 			moves.add(new PieceMove(position, position + 2, SpecialMove.CASTLE_QUEENSIDE));
 		}
 		return moves;

@@ -226,8 +226,8 @@ public class Game {
 
 	public void setMoves() {
 		Bitboard blockers = new Bitboard();
-		for(Bitboard[] pieceColors : piecePositions) {
-			for(Bitboard piece : pieceColors) {
+		for(Bitboard[] piecePosition : piecePositions) {
+			for(Bitboard piece : piecePosition) {
 				blockers = new Bitboard(piece.getBitboard() | blockers.getBitboard());
 			}
 		}
