@@ -1,5 +1,5 @@
-![PlanktonEngine logo](logo.png)
-# Plankton Engine
+<img src = "logo.png" align = "center" alt = "PlanktonEngine Logo">
+<h1 align = "center">Plankton Engine</h1>
 A simple Java engine that uses the UCI protocol.
 
 ## Run
