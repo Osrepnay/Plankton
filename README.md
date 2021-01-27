@@ -1,4 +1,4 @@
-<img src = "logo.png" align = "center" alt = "PlanktonEngine Logo">
+<p align = "center"><img src = "logo.png" alt = "PlanktonEngine Logo"></p>
 <h1 align = "center">Plankton Engine</h1>
 A simple Java engine that uses the UCI protocol.
 
