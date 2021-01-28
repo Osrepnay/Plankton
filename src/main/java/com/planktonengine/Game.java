@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class Game {
-	private Bitboard[][] piecePositions = new Bitboard[2][6];
+	private long[][] piecePositions = new long[2][6];
 	private HashMap<Integer, Integer> squareToColor = new HashMap<>();
 	private HashMap<Integer, Integer> squareToPiece = new HashMap<>();
 	@SuppressWarnings("unchecked")
@@ -25,29 +25,29 @@ public class Game {
 		int capturePiece = -1;
 		if(squareToColor.containsKey(move.end)) {
 			capturePiece = squareToPiece.get(move.end);
-			piecePositions[opponentColor][capturePiece].setSquare(move.end, false);
+			piecePositions[opponentColor][capturePiece] &= ~(1L << move.end);
 			squareToColor.remove(move.end);
 			squareToPiece.remove(move.end);
 		}
 		squareToColor.put(move.end, color);
 		squareToPiece.put(move.end, piece);
-		piecePositions[color][piece].setSquare(move.start, false);
-		piecePositions[color][piece].setSquare(move.end, true);
+		piecePositions[color][piece] &= ~(1L << move.start);
+		piecePositions[color][piece] |= 1L << move.end;
 		boolean[] prevCastleAvailable = Arrays.copyOf(castleAvailable, castleAvailable.length);
 		if(piece == 5) {
 			castleAvailable = new boolean[4];
 			if(move.special == SpecialMove.CASTLE_KINGSIDE) {
 				//kingside
-				piecePositions[color][3].setSquare(move.end + 1, false);
-				piecePositions[color][3].setSquare(move.end - 1, true);
+				piecePositions[color][3] &= ~(1L << (move.end + 1));
+				piecePositions[color][3] |= 1L << (move.end - 1);
 				squareToColor.remove(move.end + 1);
 				squareToPiece.remove(move.end + 1);
 				squareToColor.put(move.end - 1, color);
 				squareToPiece.put(move.end - 1, 3);
 			} else if(move.special == SpecialMove.CASTLE_QUEENSIDE) {
 				//queenside
-				piecePositions[color][3].setSquare(move.end - 2, false);
-				piecePositions[color][3].setSquare(move.end + 1, true);
+				piecePositions[color][3] &= ~(1L << (move.end - 2));
+				piecePositions[color][3] |= 1L << (move.end + 1);
 				squareToColor.remove(move.end - 2);
 				squareToPiece.remove(move.end - 2);
 				squareToColor.put(move.end + 1, color);
@@ -71,26 +71,26 @@ public class Game {
 		} else if(piece == 0) {
 			switch(move.special) {
 				case PROMOTION_KNIGHT:
-					piecePositions[color][piece].setSquare(move.end, false);
-					piecePositions[color][1].setSquare(move.end, true);
+					piecePositions[color][piece] &= ~(1L << move.end);
+					piecePositions[color][1] |= 1L << move.end;
 					squareToPiece.remove(move.end);
 					squareToPiece.put(move.end, 1);
 					break;
 				case PROMOTION_BISHOP:
-					piecePositions[color][piece].setSquare(move.end, false);
-					piecePositions[color][2].setSquare(move.end, true);
+					piecePositions[color][piece] &= ~(1L << move.end);
+					piecePositions[color][2] |= 1L << move.end;
 					squareToPiece.remove(move.end);
 					squareToPiece.put(move.end, 2);
 					break;
 				case PROMOTION_ROOK:
-					piecePositions[color][piece].setSquare(move.end, false);
-					piecePositions[color][3].setSquare(move.end, true);
+					piecePositions[color][piece] &= ~(1L << move.end);
+					piecePositions[color][3] |= 1L << move.end;
 					squareToPiece.remove(move.end);
 					squareToPiece.put(move.end, 3);
 					break;
 				case PROMOTION_QUEEN:
-					piecePositions[color][piece].setSquare(move.end, false);
-					piecePositions[color][4].setSquare(move.end, true);
+					piecePositions[color][piece] &= ~(1L << move.end);
+					piecePositions[color][4] |= 1L << move.end;
 					squareToPiece.remove(move.end);
 					squareToPiece.put(move.end, 4);
 					break;
@@ -98,21 +98,21 @@ public class Game {
 					capturePiece = 0;
 					if(color == 0) {
 						if(move.end - move.start == 7) {
-							piecePositions[opponentColor][0].setSquare(move.start - 1, false);
+							piecePositions[opponentColor][0] &= ~(1L << (move.start - 1));
 							squareToColor.remove(move.start - 1);
 							squareToPiece.remove(move.start - 1);
 						} else {
-							piecePositions[opponentColor][0].setSquare(move.start + 1, false);
+							piecePositions[opponentColor][0] &= ~(1L << (move.start + 1));
 							squareToColor.remove(move.start + 1);
 							squareToPiece.remove(move.start + 1);
 						}
 					} else {
 						if(move.start - move.end == 7) {
-							piecePositions[opponentColor][0].setSquare(move.start + 1, false);
+							piecePositions[opponentColor][0] &= ~(1L << (move.start + 1));
 							squareToColor.remove(move.start + 1);
 							squareToPiece.remove(move.start + 1);
 						} else {
-							piecePositions[opponentColor][0].setSquare(move.start - 1, false);
+							piecePositions[opponentColor][0] &= ~(1L << (move.start - 1));
 							squareToColor.remove(move.start - 1);
 							squareToPiece.remove(move.start - 1);
 						}
@@ -130,29 +130,29 @@ public class Game {
 		squareToPiece.remove(move.end);
 		int opponentColor = color ^ 1;
 		if(prevMoveState.getCapturePiece() != -1) {
-			piecePositions[opponentColor][prevMoveState.getCapturePiece()].setSquare(move.end, true);
+			piecePositions[opponentColor][prevMoveState.getCapturePiece()] |= 1L << move.end;
 			squareToColor.put(move.end, opponentColor);
 			squareToPiece.put(move.end, prevMoveState.getCapturePiece());
 		}
 		squareToColor.put(move.start, color);
 		squareToPiece.put(move.start, piece);
-		piecePositions[color][piece].setSquare(move.start, true);
-		piecePositions[color][piece].setSquare(move.end, false);
+		piecePositions[color][piece] |= 1L << move.start;
+		piecePositions[color][piece] &= ~(1L << move.end);
 		castleAvailable = prevMoveState.getCastleAvailable();
 		if(piece == 5) {
 			castleAvailable = new boolean[4];
 			if(move.special == SpecialMove.CASTLE_KINGSIDE) {
 				//kingside
-				piecePositions[color][3].setSquare(move.end + 1, true);
-				piecePositions[color][3].setSquare(move.end - 1, false);
+				piecePositions[color][3] |= 1L << (move.end + 1);
+				piecePositions[color][3] &= ~(1L << (move.end - 1));
 				squareToColor.remove(move.end - 1);
 				squareToPiece.remove(move.end - 1);
 				squareToColor.put(move.end + 1, color);
 				squareToPiece.put(move.end + 1, 3);
 			} else if(move.special == SpecialMove.CASTLE_QUEENSIDE) {
 				//queenside
-				piecePositions[color][3].setSquare(move.end - 2, true);
-				piecePositions[color][3].setSquare(move.end + 1, false);
+				piecePositions[color][3] |= 1L << (move.end - 2);
+				piecePositions[color][3] &= ~(1L << (move.end + 1));
 				squareToColor.remove(move.end + 1);
 				squareToPiece.remove(move.end + 1);
 				squareToColor.put(move.end - 2, color);
@@ -161,47 +161,47 @@ public class Game {
 		} else if(piece == 0) {
 			switch(move.special) {
 				case PROMOTION_KNIGHT:
-					piecePositions[color][piece].setSquare(move.start, true);
-					piecePositions[color][1].setSquare(move.end, false);
+					piecePositions[color][piece] |= 1L << move.start;
+					piecePositions[color][1] &= ~(1L << move.end);
 					squareToPiece.remove(move.start);
 					squareToPiece.put(move.start, 0);
 					break;
 				case PROMOTION_BISHOP:
-					piecePositions[color][piece].setSquare(move.start, true);
-					piecePositions[color][2].setSquare(move.end, false);
+					piecePositions[color][piece] |= 1L << move.start;
+					piecePositions[color][2] &= ~(1L << move.end);
 					squareToPiece.remove(move.start);
 					squareToPiece.put(move.start, 0);
 					break;
 				case PROMOTION_ROOK:
-					piecePositions[color][piece].setSquare(move.start, true);
-					piecePositions[color][3].setSquare(move.end, false);
+					piecePositions[color][piece] |= 1L << move.start;
+					piecePositions[color][3] &= ~(1L << move.end);
 					squareToPiece.remove(move.start);
 					squareToPiece.put(move.start, 0);
 					break;
 				case PROMOTION_QUEEN:
-					piecePositions[color][piece].setSquare(move.start, true);
-					piecePositions[color][4].setSquare(move.end, false);
+					piecePositions[color][piece] |= 1L << move.start;
+					piecePositions[color][4] &= ~(1L << move.end);
 					squareToPiece.remove(move.start);
 					squareToPiece.put(move.start, 0);
 					break;
 				case EN_PASSANT:
 					if(color == 0) {
 						if(move.end - move.start == 7) {
-							piecePositions[opponentColor][0].setSquare(move.start - 1, true);
+							piecePositions[opponentColor][0] |= 1L << (move.start - 1);
 							squareToColor.put(move.start - 1, opponentColor);
 							squareToPiece.put(move.start - 1, 0);
 						} else {
-							piecePositions[opponentColor][0].setSquare(move.start + 1, true);
+							piecePositions[opponentColor][0] |= 1L << (move.start + 1);
 							squareToColor.put(move.start + 1, opponentColor);
 							squareToPiece.put(move.start + 1, 0);
 						}
 					} else {
 						if(move.start - move.end == 7) {
-							piecePositions[opponentColor][0].setSquare(move.start + 1, true);
+							piecePositions[opponentColor][0] |= 1L << (move.start + 1);
 							squareToColor.put(move.start + 1, opponentColor);
 							squareToPiece.put(move.start + 1, 0);
 						} else {
-							piecePositions[opponentColor][0].setSquare(move.start - 1, true);
+							piecePositions[opponentColor][0] |= 1L << (move.start - 1);
 							squareToColor.put(move.start - 1, opponentColor);
 							squareToPiece.put(move.start - 1, 0);
 						}
@@ -213,22 +213,22 @@ public class Game {
 	}
 
 	public void createPiece(int color, int piece, int[] position) {
-		piecePositions[color][piece].setSquare(position[0] + position[1] * 8, true);
+		piecePositions[color][piece] |= 1L << (position[0] + position[1] * 8);
 		squareToColor.put(position[0] + position[1] * 8, color);
 		squareToPiece.put(position[0] + position[1] * 8, piece);
 	}
 
 	public void deletePiece(int color, int piece, int[] position) {
-		piecePositions[color][piece].setSquare(position[0] + position[1] * 8, false);
+		piecePositions[color][piece] &= ~(1L << (position[0] + position[1] * 8));
 		squareToColor.remove(position[0] + position[1] * 8);
 		squareToPiece.remove(position[0] + position[1] * 8);
 	}
 
 	public void setMoves() {
-		Bitboard blockers = new Bitboard();
-		for(Bitboard[] piecePosition : piecePositions) {
-			for(Bitboard piece : piecePosition) {
-				blockers = new Bitboard(piece.getBitboard() | blockers.getBitboard());
+		long blockers = 0L;
+		for(long[] piecePosition : piecePositions) {
+			for(long piece : piecePosition) {
+				blockers |= piece;
 			}
 		}
 		for(int i = 0; i < 64; i++) {
@@ -237,7 +237,7 @@ public class Game {
 		for(int color = 0; color < piecePositions.length; color++) {
 			for(int piece = 0; piece < piecePositions[color].length; piece++) {
 				for(int position = 0; position < 64; position++) {
-					if(piecePositions[color][piece].getSquare(position)) {
+					if(((piecePositions[color][piece] >> position) & 1) != 0) {
 						pieceMoves[position] = moveGen.genMove(position, blockers, castleAvailable, color, piece);
 					}
 				}
@@ -246,10 +246,8 @@ public class Game {
 	}
 
 	public void resetGame() {
-		for(int i = 0; i < piecePositions.length; i++) {
-			for(int j = 0; j < piecePositions[i].length; j++) {
-				piecePositions[i][j] = new Bitboard();
-			}
+		for(long[] piecePosition : piecePositions) {
+			Arrays.fill(piecePosition, 0L);
 		}
 		squareToColor = new HashMap<>();
 		squareToPiece = new HashMap<>();
@@ -280,10 +278,8 @@ public class Game {
 	}
 
 	public void blankGame() {
-		for(int i = 0; i < piecePositions.length; i++) {
-			for(int j = 0; j < piecePositions[i].length; j++) {
-				piecePositions[i][j] = new Bitboard();
-			}
+		for(long[] piecePosition : piecePositions) {
+			Arrays.fill(piecePosition, 0L);
 		}
 		squareToColor = new HashMap<>();
 		squareToPiece = new HashMap<>();
@@ -291,16 +287,12 @@ public class Game {
 		setMoves();
 	}
 
-	public Bitboard[] piecePositionsFromColor(int color) {
-		Bitboard[] copy = new Bitboard[piecePositions[color].length];
-		for(int i = 0; i < piecePositions[color].length; i++) {
-			copy[i] = new Bitboard(piecePositions[color][i].getBitboard());
-		}
-		return copy;
+	public long[] piecePositionsFromColor(int color) {
+		return Arrays.copyOf(piecePositions[color], piecePositions[color].length);
 	}
 
-	public Bitboard piecePositions(int color, int piece) {
-		return new Bitboard(piecePositions[color][piece].getBitboard());
+	public long piecePositions(int color, int piece) {
+		return piecePositions[color][piece];
 	}
 
 	public int colorOfSquare(int square) {

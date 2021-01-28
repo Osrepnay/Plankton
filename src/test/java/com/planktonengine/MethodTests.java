@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class MethodTests {
 
@@ -19,8 +20,8 @@ public class MethodTests {
 		game.createPiece(0, 5, new int[] {0, 2});
 		game.createPiece(0, 3, new int[] {7, 0});
 		game.setMoves();
-		assertEquals(true, engine.inCheck(game, 1));
-		assertEquals(true, engine.inCheckmate(game, 1));
+		assertTrue(engine.inCheck(game, 1));
+		assertTrue(engine.inCheckmate(game, 1));
 	}
 
 	//TODO add move tests for all pieces
@@ -34,7 +35,7 @@ public class MethodTests {
 		rightMoves.add(new PieceMove(8, 24, SpecialMove.NONE));
 		boolean equals = game.pieceMovesFromSquare(8).containsAll(rightMoves)
 				&& rightMoves.containsAll(game.pieceMovesFromSquare(8));
-		assertEquals(true, equals);
+		assertTrue(equals);
 	}
 
 	@Test
@@ -47,6 +48,11 @@ public class MethodTests {
 		game.createPiece(0, 0, new int[] {5, 4});
 		game.setMoves();
 		assertEquals(-4, engine.see(game, new PieceMove(55, 46, SpecialMove.NONE)), 0.001);
+	}
+
+	@Test
+	public void testBitboardUtil() {
+
 	}
 
 }

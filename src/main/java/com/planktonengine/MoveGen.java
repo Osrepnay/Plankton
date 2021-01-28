@@ -5,22 +5,11 @@ import java.util.List;
 
 public class MoveGen {
 
-	Bitboard[][] rays = new Bitboard[64][8];
-	Bitboard[] knightMoves = new Bitboard[64];
-	Bitboard[] kingMoves = new Bitboard[64];
+	long[][] rays = new long[64][8];
+	long[] knightMoves = new long[64];
+	long[] kingMoves = new long[64];
 
 	public MoveGen() {
-		for(int i = 0; i < rays.length; i++) {
-			for(int j = 0; j < rays[i].length; j++) {
-				rays[i][j] = new Bitboard();
-			}
-		}
-		for(int i = 0; i < knightMoves.length; i++) {
-			knightMoves[i] = new Bitboard();
-		}
-		for(int i = 0; i < kingMoves.length; i++) {
-			kingMoves[i] = new Bitboard();
-		}
 		for(int i = 0; i < knightMoves.length; i++) {
 			int[] possibleKnightMoves = new int[8];
 			possibleKnightMoves[0] = i + 15;
@@ -31,13 +20,13 @@ public class MoveGen {
 			possibleKnightMoves[5] = i - 17;
 			possibleKnightMoves[6] = i - 10;
 			possibleKnightMoves[7] = i + 6;
-			for(int j = 0; j < possibleKnightMoves.length; j++) {
-				if(possibleKnightMoves[j] >= 0 && possibleKnightMoves[j] < 64) {
-					if(!((i - 1) % 8 == 0 && (possibleKnightMoves[j] + 1) % 8 == 0) &&
-							!(i % 8 == 0 && ((possibleKnightMoves[j] + 2) % 8 == 0 || (possibleKnightMoves[j] + 1) % 8 == 0)) &&
-							!((i + 2) % 8 == 0 && possibleKnightMoves[j] % 8 == 0) &&
-							!((i + 1) % 8 == 0 && ((possibleKnightMoves[j] - 1) % 8 == 0 || possibleKnightMoves[j] % 8 == 0))) {
-						knightMoves[i].setSquare(possibleKnightMoves[j], true);
+			for(int possibleKnightMove : possibleKnightMoves) {
+				if(possibleKnightMove >= 0 && possibleKnightMove < 64) {
+					if(!((i - 1) % 8 == 0 && (possibleKnightMove + 1) % 8 == 0) &&
+							!(i % 8 == 0 && ((possibleKnightMove + 2) % 8 == 0 || (possibleKnightMove + 1) % 8 == 0)) &&
+							!((i + 2) % 8 == 0 && possibleKnightMove % 8 == 0) &&
+							!((i + 1) % 8 == 0 && ((possibleKnightMove - 1) % 8 == 0 || possibleKnightMove % 8 == 0))) {
+						knightMoves[i] |= 1L << possibleKnightMove;
 					}
 				}
 			}
@@ -52,11 +41,11 @@ public class MoveGen {
 			possibleKingMoves[5] = i - 9;
 			possibleKingMoves[6] = i - 1;
 			possibleKingMoves[7] = i + 7;
-			for(int j = 0; j < possibleKingMoves.length; j++) {
-				if(possibleKingMoves[j] >= 0 && possibleKingMoves[j] < 64) {
-					if(!(i % 8 == 0 && (possibleKingMoves[j] + 1) % 8 == 0) &&
-							!((i + 1) % 8 == 0 && possibleKingMoves[j] % 8 == 0)) {
-						kingMoves[i].setSquare(possibleKingMoves[j], true);
+			for(int possibleKingMove : possibleKingMoves) {
+				if(possibleKingMove >= 0 && possibleKingMove < 64) {
+					if(!(i % 8 == 0 && (possibleKingMove + 1) % 8 == 0) &&
+							!((i + 1) % 8 == 0 && possibleKingMove % 8 == 0)) {
+						kingMoves[i] |= 1L << possibleKingMove;
 					}
 				}
 			}
@@ -68,7 +57,7 @@ public class MoveGen {
 		}
 	}
 
-	public List<PieceMove> genMove(int position, Bitboard blockers, boolean[] castleAvailable, int color, int piece) {
+	public List<PieceMove> genMove(int position, long blockers, boolean[] castleAvailable, int color, int piece) {
 		switch(piece) {
 			case 0:
 				return genPawn(position, blockers, color);
@@ -90,8 +79,8 @@ public class MoveGen {
 		}
 	}
 
-	public List<PieceMove> genPawn(int position, Bitboard blockers, int color) {
-		List<PieceMove> pieceMoves = new ArrayList<PieceMove>();
+	public List<PieceMove> genPawn(int position, long blockers, int color) {
+		List<PieceMove> pieceMoves = new ArrayList<>();
 		int posChange = -((color * 2 - 1) * 8);
 		//List of possible promotions if is promotion, SpecialMove.NONE if not
 		SpecialMove[] promotions;
@@ -101,34 +90,34 @@ public class MoveGen {
 		} else {
 			promotions = new SpecialMove[] {SpecialMove.NONE};
 		}
-		if(!blockers.getSquare(position + posChange)) {
+		if(((blockers >> (position + posChange)) & 1) == 0) {
 			for(SpecialMove promotion : promotions) {
 				pieceMoves.add(new PieceMove(position, position + posChange, promotion));
 			}
 			if(color == 0) {
 				//if still on starting position
-				if(position >= 8 && position < 16 && !blockers.getSquare(position + 2 * posChange)) {
+				if(position >= 8 && position < 16 && ((blockers >> (position + 2 * posChange)) & 1) == 0) {
 					for(SpecialMove promotion : promotions) {
 						pieceMoves.add(new PieceMove(position, position + 2 * posChange, promotion));
 					}
 				}
 			} else {
 				//if still on starting position
-				if(position >= 48 && position < 56 && !blockers.getSquare(position + 2 * posChange)) {
+				if(position >= 48 && position < 56 && ((blockers >> (position + 2 * posChange)) & 1) == 0) {
 					for(SpecialMove promotion : promotions) {
 						pieceMoves.add(new PieceMove(position, position + 2 * posChange, promotion));
 					}
 				}
 			}
 		}
-		if(position + posChange + 1 >= 0 && position + posChange + 1 < 64 && blockers.getSquare(
-				position + posChange + 1) && (position + 1) % 8 != 0) {
+		if(position + posChange + 1 >= 0 && position + posChange + 1 < 64 &&
+				((blockers >> (position + posChange + 1)) & 1) != 0 && (position + 1) % 8 != 0) {
 			for(SpecialMove promotion : promotions) {
 				pieceMoves.add(new PieceMove(position, position + posChange + 1, promotion));
 			}
 		}
-		if(position + posChange - 1 >= 0 && position + posChange - 1 < 64 && blockers.getSquare(
-				position + posChange - 1) && position % 8 != 0) {
+		if(position + posChange - 1 >= 0 && position + posChange - 1 < 64 &&
+				((blockers >> (position + posChange - 1)) & 1) != 0 && position % 8 != 0) {
 			for(SpecialMove promotion : promotions) {
 				pieceMoves.add(new PieceMove(position, position + posChange - 1, promotion));
 			}
@@ -136,13 +125,13 @@ public class MoveGen {
 		return pieceMoves;
 	}
 
-	public List<PieceMove> genBishop(int position, Bitboard blockers) {
-		Bitboard board = new Bitboard();
+	public List<PieceMove> genBishop(int position, long blockers) {
+		long board = 0L;
 		for(int i = 0; i < 4; i++) {
-			Bitboard maskedBlockers = new Bitboard(blockers.getBitboard() & rays[position][i * 2 + 1].getBitboard());
+			long maskedBlockers = blockers & rays[position][i * 2 + 1];
 			int firstBlockerPosition = -1;
-			Bitboard moves;
-			if(maskedBlockers.getBitboard() == 0) {
+			long moves;
+			if(maskedBlockers == 0) {
 				moves = rays[position][i * 2 + 1];
 			} else {
 				switch(i * 2 + 1) {
@@ -155,21 +144,21 @@ public class MoveGen {
 						firstBlockerPosition = BitboardUtility.scanDown(maskedBlockers);
 						break;
 				}
-				Bitboard blockerRay = new Bitboard(~rays[firstBlockerPosition][i * 2 + 1].getBitboard());
-				moves = new Bitboard(rays[position][i * 2 + 1].getBitboard() & blockerRay.getBitboard());
+				long blockerRay = rays[firstBlockerPosition][i * 2 + 1];
+				moves = rays[position][i * 2 + 1] & ~blockerRay;
 			}
-			board = new Bitboard(moves.getBitboard() | board.getBitboard());
+			board |= moves;
 		}
 		return BitboardUtility.bitboardToPieceMoves(position, board);
 	}
 
-	public List<PieceMove> genRook(int position, Bitboard blockers) {
-		Bitboard board = new Bitboard();
+	public List<PieceMove> genRook(int position, long blockers) {
+		long board = 0L;
 		for(int i = 0; i < 4; i++) {
-			Bitboard maskedBlockers = new Bitboard(blockers.getBitboard() & rays[position][i * 2].getBitboard());
+			long maskedBlockers = blockers & rays[position][i * 2];
 			int firstBlockerPosition = -1;
-			Bitboard moves;
-			if(maskedBlockers.getBitboard() == 0) {
+			long moves;
+			if(maskedBlockers == 0) {
 				moves = rays[position][i * 2];
 			} else {
 				switch(i * 2) {
@@ -182,78 +171,80 @@ public class MoveGen {
 						firstBlockerPosition = BitboardUtility.scanDown(maskedBlockers);
 						break;
 				}
-				Bitboard blockerRay = new Bitboard(~rays[firstBlockerPosition][i * 2].getBitboard());
-				moves = new Bitboard(rays[position][i * 2].getBitboard() & blockerRay.getBitboard());
+				long blockerRay = rays[firstBlockerPosition][i * 2];
+				moves = rays[position][i * 2] & ~blockerRay;
 			}
-			board = new Bitboard(moves.getBitboard() | board.getBitboard());
+			board |= moves;
 		}
 		return BitboardUtility.bitboardToPieceMoves(position, board);
 	}
 
-	public List<PieceMove> genKing(int position, Bitboard blockers, boolean[] castleAvailable, int color) {
+	public List<PieceMove> genKing(int position, long blockers, boolean[] castleAvailable, int color) {
 		List<PieceMove> moves = BitboardUtility.bitboardToPieceMoves(position, kingMoves[position]);
-		if(castleAvailable[color * 2] && !blockers.getSquare(position + 1) && !blockers.getSquare(position + 2)) {
+		if(castleAvailable[color * 2] && ((blockers >> (position + 1)) & 1) == 0 &&
+				((blockers >> (position + 2)) & 1) == 0) {
 			moves.add(new PieceMove(position, position + 2, SpecialMove.CASTLE_KINGSIDE));
 		}
-		if(castleAvailable[color * 2 + 1] && !blockers.getSquare(position - 1) && !blockers.getSquare(position - 2) && !blockers.getSquare(position - 3)) {
-			moves.add(new PieceMove(position, position + 2, SpecialMove.CASTLE_QUEENSIDE));
+		if(castleAvailable[color * 2 + 1] && ((blockers >> (position - 1)) & 1) == 0 &&
+				((blockers >> (position - 2)) & 1) == 0 && ((blockers >> (position - 3)) & 1) == 0) {
+			moves.add(new PieceMove(position, position - 2, SpecialMove.CASTLE_QUEENSIDE));
 		}
 		return moves;
 	}
 
-	private Bitboard genRay(int position, int direction) {
-		Bitboard ray = new Bitboard();
+	private long genRay(int position, int direction) {
+		long ray = 0L;
 		switch(direction) {
 			case 0:
 				// up
 				for(int i = position; i < 64; i += 8) {
-					ray.setSquare(i, true);
+					ray |= 1L << i;
 				}
 				break;
 			case 1:
 				// up-right
 				for(int i = position; i < 64 && !(i % 8 == 0 && i != position); i += 9) {
-					ray.setSquare(i, true);
+					ray |= 1L << i;
 				}
 				break;
 			case 2:
 				// right
 				for(int i = position; i < 64 && !(i % 8 == 0 && i != position); i++) {
-					ray.setSquare(i, true);
+					ray |= 1L << i;
 				}
 				break;
 			case 3:
 				// down-right
 				for(int i = position; i >= 0 && !(i % 8 == 0 && i != position); i -= 7) {
-					ray.setSquare(i, true);
+					ray |= 1L << i;
 				}
 				break;
 			case 4:
 				// down
 				for(int i = position; i >= 0; i -= 8) {
-					ray.setSquare(i, true);
+					ray |= 1L << i;
 				}
 				break;
 			case 5:
 				// down-left
 				for(int i = position; i >= 0 && !((i + 1) % 8 == 0 && i != position); i -= 9) {
-					ray.setSquare(i, true);
+					ray |= 1L << i;
 				}
 				break;
 			case 6:
 				// left
 				for(int i = position; i >= 0 && !((i + 1) % 8 == 0 && i != position); i--) {
-					ray.setSquare(i, true);
+					ray |= 1L << i;
 				}
 				break;
 			case 7:
 				// up-left
 				for(int i = position; i < 64 && !((i + 1) % 8 == 0 && i != position); i += 7) {
-					ray.setSquare(i, true);
+					ray |= 1L << i;
 				}
 				break;
 		}
-		ray.setSquare(position, false);
+		ray &= ~(1L << position);
 		return ray;
 	}
 }

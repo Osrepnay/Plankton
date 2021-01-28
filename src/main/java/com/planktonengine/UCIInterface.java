@@ -55,7 +55,8 @@ public class UCIInterface {
 					for(int i = offset; i < input.length; i++) {
 						int startPos = (input[i].charAt(0) - 'a') + (Character.getNumericValue(
 								input[i].charAt(1)) - 1) * 8;
-						int move = (input[i].charAt(2) - 'a') + (Character.getNumericValue(input[i].charAt(3)) - 1) * 8;
+						int move =
+								(input[i].charAt(2) - 'a') + (Character.getNumericValue(input[i].charAt(3)) - 1) * 8;
 						int moveColor = i % 2 == 0 ? 1 : 0;
 						int piece = game.pieceOfSquare(startPos);
 						SpecialMove special = SpecialMove.NONE;
@@ -139,10 +140,11 @@ public class UCIInterface {
 					}
 					int[] startPos = new int[] {(int)(bestMove[0] % 8), (int)(bestMove[0] / 8)};
 					int[] endPos = new int[] {(int)(bestMove[1] % 8), (int)(bestMove[1] / 8)};
-					String printString = "bestmove " + (char)(startPos[0] + 'a') + (startPos[1] + 1) + (char)(endPos[0] + 'a')
-							+ (endPos[1] + 1);
-					if(game.piecePositions(color, 0)
-							.getSquare((int)bestMove[0]) && (endPos[1] == 0 || endPos[1] == 7)) {
+					String printString =
+							"bestmove " + (char)(startPos[0] + 'a') + (startPos[1] + 1) + (char)(endPos[0] + 'a') +
+									(endPos[1] + 1);
+					if(((game.piecePositions(color, 0) >> (int)bestMove[0]) & 1) != 0 &&
+							(endPos[1] == 0 || endPos[1] == 7)) {
 						printString += "q";
 					}
 					System.out.println(printString);

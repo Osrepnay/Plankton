@@ -239,8 +239,8 @@ public class PlanktonEngine {
 		double score = 0;
 		double[] totalMaterial = new double[2];
 		for(int piece = 0; piece < game.piecePositionsFromColor(0).length; piece++) {
-			double wScore = Long.bitCount(game.piecePositions(0, piece).getBitboard()) * pieceScores[piece];
-			double bScore = Long.bitCount(game.piecePositions(1, piece).getBitboard()) * pieceScores[piece];
+			double wScore = Long.bitCount(game.piecePositions(0, piece)) * pieceScores[piece];
+			double bScore = Long.bitCount(game.piecePositions(1, piece)) * pieceScores[piece];
 			score += wScore;
 			score -= bScore;
 			if(piece != 5) {
@@ -313,8 +313,8 @@ public class PlanktonEngine {
 		int opponentColor = color ^ 1;
 		for(int square = 0; square < 64; square++) {
 			if(game.pieceExists(square) && game.colorOfSquare(square) == opponentColor) {
-				if((BitboardUtility.pieceMovesToBitboard(game.pieceMovesFromSquare(square)).getBitboard()
-						& game.piecePositions(color, 5).getBitboard()) != 0) {
+				if((BitboardUtility.pieceMovesToBitboard(game.pieceMovesFromSquare(square)) &
+						game.piecePositions(color, 5)) != 0) {
 					return true;
 				}
 			}
