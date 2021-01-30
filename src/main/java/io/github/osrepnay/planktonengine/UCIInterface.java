@@ -1,4 +1,4 @@
-package com.planktonengine;
+package io.github.osrepnay.planktonengine;
 
 import java.io.BufferedReader;
 import java.io.IOException;

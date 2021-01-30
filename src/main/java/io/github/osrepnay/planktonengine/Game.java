@@ -1,4 +1,4 @@
-package com.planktonengine;
+package io.github.osrepnay.planktonengine;
 
 import java.util.ArrayList;
 import java.util.Arrays;

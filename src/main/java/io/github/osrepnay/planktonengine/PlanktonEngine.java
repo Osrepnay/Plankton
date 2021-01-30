@@ -1,4 +1,4 @@
-package com.planktonengine;
+package io.github.osrepnay.planktonengine;
 
 public class PlanktonEngine {
 

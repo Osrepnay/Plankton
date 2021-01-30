@@ -1,4 +1,4 @@
-package com.planktonengine;
+package io.github.osrepnay.planktonengine;
 
 import org.junit.Assert;
 import org.junit.Test;
