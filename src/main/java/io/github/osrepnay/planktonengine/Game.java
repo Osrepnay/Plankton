@@ -140,7 +140,6 @@ public class Game {
 		piecePositions[color][piece] &= ~(1L << move.end);
 		castleAvailable = prevMoveState.getCastleAvailable();
 		if(piece == 5) {
-			castleAvailable = new boolean[4];
 			if(move.special == SpecialMove.CASTLE_KINGSIDE) {
 				//kingside
 				piecePositions[color][3] |= 1L << (move.end + 1);
