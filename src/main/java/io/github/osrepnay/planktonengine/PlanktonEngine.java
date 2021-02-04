@@ -6,7 +6,7 @@ public class PlanktonEngine {
 	private double[] pieceScores = new double[] {1, 3, 3.25, 5, 9, 10000};
 
 	public double[] bestMove(Game game, int color, int depth) {
-		double[] bestMove = new double[] {-1, -1, 0};
+		double[] bestMove = new double[] {-1, -1, 0, -1};
 		double bestMoveScore = color == 0 ? Integer.MIN_VALUE : Integer.MAX_VALUE;
 		for(int square = 0; square < 64; square++) {
 			if(!game.pieceExists(square) || game.colorOfSquare(square) != color) {
@@ -15,7 +15,7 @@ public class PlanktonEngine {
 			int piece = game.pieceOfSquare(square);
 			for(PieceMove move : game.pieceMovesFromSquare(square)) {
 				if(!keepSearching) {
-					return new double[] {-1, -1, 0};
+					return new double[] {-1, -1, 0, -1};
 				}
 				if(!validMove(game, move, color, piece)) {
 					continue;
@@ -29,11 +29,26 @@ public class PlanktonEngine {
 				game.unMakeMove(move, color, piece, prevMoveState);
 				//sign for ran out of time
 				if(moveScore == Double.MAX_VALUE) {
-					return new double[] {-1, -1, 0};
+					return new double[] {-1, -1, 0, -1};
 				}
 				if(color == 0 ? moveScore > bestMoveScore : moveScore < bestMoveScore) {
 					bestMoveScore = moveScore;
-					bestMove = new double[] {move.start, move.end, bestMoveScore};
+					double promotion = -1;
+					switch(move.special) {
+						case PROMOTION_KNIGHT:
+							promotion = 1;
+							break;
+						case PROMOTION_BISHOP:
+							promotion = 2;
+							break;
+						case PROMOTION_ROOK:
+							promotion = 3;
+							break;
+						case PROMOTION_QUEEN:
+							promotion = 4;
+							break;
+					}
+					bestMove = new double[] {move.start, move.end, bestMoveScore, promotion};
 				}
 			}
 		}

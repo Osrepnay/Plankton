@@ -19,7 +19,7 @@ public class PositionalTest {
 		game.createPiece(0, 3, new int[] {7, 1});
 		game.setMoves();
 		double[] bestMove = engine.bestMove(game, 0, 1);
-		Assert.assertArrayEquals(new double[] {15, 7, 10000}, bestMove, 0);
+		Assert.assertArrayEquals(new double[] {15, 7, 10000, -1}, bestMove, 0);
 	}
 
 	@Test
