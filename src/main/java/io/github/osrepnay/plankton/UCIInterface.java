@@ -1,4 +1,4 @@
-package io.github.osrepnay.planktonengine;
+package io.github.osrepnay.plankton;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,11 +8,11 @@ import java.util.HashMap;
 
 public class UCIInterface {
 
-	private volatile static PlanktonEngine engine = new PlanktonEngine();
+	private volatile static Plankton engine = new Plankton();
 	private static Game game = new Game();
 
 	public static void main(String[] args) throws IOException {
-		System.out.println("PlanktonEngine");
+		System.out.println("Plankton");
 		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 		String[] input = reader.readLine().split(" ");
 		int color = 0;
@@ -24,8 +24,8 @@ public class UCIInterface {
 			}
 			switch(input[0]) {
 				case "uci":
-					System.out.println("id name Plankton Engine");
-					System.out.println("id author Anonymous Anonymous");
+					System.out.println("id name Plankton");
+					System.out.println("id author Nosrep");
 					System.out.println("uciok");
 					break;
 				case "isready":

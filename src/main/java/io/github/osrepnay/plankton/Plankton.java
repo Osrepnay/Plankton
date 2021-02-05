@@ -1,6 +1,6 @@
-package io.github.osrepnay.planktonengine;
+package io.github.osrepnay.plankton;
 
-public class PlanktonEngine {
+public class Plankton {
 
 	public volatile boolean keepSearching = true;
 	private double[] pieceScores = new double[] {1, 3, 3.25, 5, 9, 10000};

@@ -1,4 +1,4 @@
-package io.github.osrepnay.planktonengine;
+package io.github.osrepnay.plankton;
 
 public class PSTables {
 	public static double[][] psTables = new double[][] {

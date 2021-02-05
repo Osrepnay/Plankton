@@ -1,4 +1,4 @@
-package io.github.osrepnay.planktonengine;
+package io.github.osrepnay.plankton;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 public class PositionalTest {
 
-	private PlanktonEngine engine = new PlanktonEngine();
+	private Plankton engine = new Plankton();
 	private Game game = new Game();
 
 	@Test

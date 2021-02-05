@@ -1,4 +1,4 @@
-package io.github.osrepnay.planktonengine;
+package io.github.osrepnay.plankton;
 
 import java.util.Objects;
 

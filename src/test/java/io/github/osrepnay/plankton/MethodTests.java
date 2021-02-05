@@ -1,4 +1,4 @@
-package io.github.osrepnay.planktonengine;
+package io.github.osrepnay.plankton;
 
 import org.junit.Test;
 
@@ -10,7 +10,7 @@ import static org.junit.Assert.assertTrue;
 
 public class MethodTests {
 
-	private PlanktonEngine engine = new PlanktonEngine();
+	private Plankton engine = new Plankton();
 	private Game game = new Game();
 
 	@Test
