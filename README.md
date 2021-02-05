@@ -1,9 +1,9 @@
-<p align = "center"><img src = "logo.png" alt = "PlanktonEngine Logo"></p>
-<h1 align = "center">Plankton Engine</h1>
+<p align = "center"><img src = "logo.png" alt = "Plankton Logo"></p>
+<h1 align = "center">Plankton</h1>
 A simple Java engine that uses the UCI protocol.
 
 ## Run
-To run the engine, type `./gradlew jar` to create a jar located in the `build/libs/` directory, which you can run with `java -jar build/libs/PlanktonEngine.jar`.
+To run the engine, type `./gradlew jar` to create a jar located in the `build/libs/` directory, which you can run with `java -jar build/libs/Plankton.jar`.
 
 ## Features
  - Minimax
