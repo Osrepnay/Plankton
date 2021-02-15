@@ -29,7 +29,7 @@ public class PieceMove {
 
 	@Override
 	public String toString() {
-		return "Start: " + start + ", End: " + end + ", Special type: " + special;
+		return "{Start: " + start + ", End: " + end + ", Special type: " + special + "}";
 	}
 
 }

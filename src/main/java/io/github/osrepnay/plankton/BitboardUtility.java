@@ -5,9 +5,7 @@ import java.util.List;
 
 public class BitboardUtility {
 
-	private BitboardUtility() {
-		throw new IllegalStateException("Utility class cannot be instantiated.");
-	}
+	private BitboardUtility() {}
 
 	public static int scanDown(long board) {
 		return 63 - Long.numberOfLeadingZeros(board);

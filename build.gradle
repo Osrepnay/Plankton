@@ -4,7 +4,7 @@ plugins {
 
 jar {
     manifest {
-        attributes 'Main-Class': 'io.github.osrepnay.planktonengine.UCIInterface'
+        attributes 'Main-Class': 'io.github.osrepnay.plankton.UCIInterface'
     }
 }
 

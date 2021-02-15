@@ -19,9 +19,6 @@ public class UCIInterface {
 		boolean debug = false;
 		inputLoop:
 		while(true) {
-			if(debug) {
-				System.out.printf("info string %s\n", input[0]);
-			}
 			switch(input[0]) {
 				case "uci":
 					System.out.println("id name Plankton");
@@ -90,6 +87,9 @@ public class UCIInterface {
 							}
 						}
 						game.makeMove(new PieceMove(startPos, move, special), moveColor, piece);
+						if(debug) {
+							System.out.println(new PieceMove(startPos, move, special));
+						}
 						color = moveColor ^ 1;
 					}
 					game.setMoves();
@@ -135,6 +135,9 @@ public class UCIInterface {
 						if(bestMoveTemp[0] != -1) {
 							bestMove = bestMoveTemp;
 						} else {
+							if(debug) {
+								System.out.println("info time " + (System.currentTimeMillis() - startTime));
+							}
 							break;
 						}
 					}
@@ -164,7 +167,6 @@ public class UCIInterface {
 				case "debug":
 					if(input[1].equals("on")) {
 						debug = true;
-						System.out.println("info string debug on");
 					} else if(input[1].equals("off")) {
 						debug = false;
 					}
