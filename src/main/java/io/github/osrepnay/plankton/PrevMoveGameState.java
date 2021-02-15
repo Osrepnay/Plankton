@@ -6,21 +6,21 @@ import java.util.Objects;
 /**
  * Stores some stuff that {@link Game#unMakeMove} uses to restore the previous position
  */
-public class PrevMoveGameState{
+public class PrevMoveGameState {
 
 	private int capturePiece;
 	private boolean[] castleAvailable;
 
-	public PrevMoveGameState(int capturePiece, boolean[] castleAvailable){
-		this.capturePiece=capturePiece;
-		this.castleAvailable=Arrays.copyOf(castleAvailable, castleAvailable.length);
+	public PrevMoveGameState(int capturePiece, boolean[] castleAvailable) {
+		this.capturePiece = capturePiece;
+		this.castleAvailable = Arrays.copyOf(castleAvailable, castleAvailable.length);
 	}
 
-	public int getCapturePiece(){
+	public int getCapturePiece() {
 		return capturePiece;
 	}
 
-	public boolean[] getCastleAvailable(){
+	public boolean[] getCastleAvailable() {
 		return castleAvailable;
 	}
 

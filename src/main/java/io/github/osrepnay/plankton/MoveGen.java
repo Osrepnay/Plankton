@@ -6,6 +6,10 @@ import java.util.List;
 public class MoveGen {
 
 	long[][] rays = new long[64][8];
+	long[] bishopMasks = new long[64];
+	long[] rookMasks = new long[64];
+	long[] bishopTable = new long[65536];
+	long[] rookTable = new long[262144];
 	long[] knightMoves = new long[64];
 	long[] kingMoves = new long[64];
 
@@ -53,6 +57,39 @@ public class MoveGen {
 		for(int i = 0; i < rays.length; i++) {
 			for(int j = 0; j < rays[i].length; j++) {
 				rays[i][j] = genRay(i, j);
+				if(j % 2 == 0) {
+					long edge_mask = 0;
+					switch(j) {
+						case 0:
+							edge_mask = ~0xff00000000000000L;
+							break;
+						case 2:
+							edge_mask = ~0x8080808080808080L;
+							break;
+						case 4:
+							edge_mask = ~0xffL;
+							break;
+						case 6:
+							edge_mask = ~0x101010101010101L;
+							break;
+					}
+					rookMasks[i] |= rays[i][j] & edge_mask;
+				} else {
+					bishopMasks[i] |= rays[i][j] & 35604928818740736L;
+				}
+			}
+		}
+		for(int square = 0; square < 64; square++) {
+			for(int bishopBlockersIdx = 0;
+				bishopBlockersIdx < (1L << Magics.BISHOP_INDICES[square]); bishopBlockersIdx++) {
+				long blockers = blockerFromIdx(bishopBlockersIdx, bishopMasks[square]);
+				long key = (blockers * Magics.BISHOP_MAGICS[square]) >>> (64 - Magics.BISHOP_INDICES[square]);
+				bishopTable[square * 512 + (int)key] = genBishopClassical(rays, square, blockers);
+			}
+			for(int rookBlockersIdx = 0; rookBlockersIdx < (1L << Magics.ROOK_INDICES[square]); rookBlockersIdx++) {
+				long blockers = blockerFromIdx(rookBlockersIdx, rookMasks[square]);
+				long key = (blockers * Magics.ROOK_MAGICS[square]) >>> (64 - Magics.ROOK_INDICES[square]);
+				rookTable[square * 4096 + (int)key] = genRookClassical(rays, square, blockers);
 			}
 		}
 	}
@@ -126,6 +163,18 @@ public class MoveGen {
 	}
 
 	public List<PieceMove> genBishop(int position, long blockers) {
+		long maskedBlockers = blockers & bishopMasks[position];
+		long key = (maskedBlockers * Magics.BISHOP_MAGICS[position]) >>> (64 - Magics.BISHOP_INDICES[position]);
+		return BitboardUtility.bitboardToPieceMoves(position, bishopTable[position * 512 + (int)key]);
+	}
+
+	public List<PieceMove> genRook(int position, long blockers) {
+		long maskedBlockers = blockers & rookMasks[position];
+		long key = (maskedBlockers * Magics.ROOK_MAGICS[position]) >>> (64 - Magics.ROOK_INDICES[position]);
+		return BitboardUtility.bitboardToPieceMoves(position, rookTable[position * 4096 + (int)key]);
+	}
+
+	public static long genBishopClassical(long[][] rays, int position, long blockers) {
 		long board = 0L;
 		for(int i = 0; i < 4; i++) {
 			long maskedBlockers = blockers & rays[position][i * 2 + 1];
@@ -149,10 +198,10 @@ public class MoveGen {
 			}
 			board |= moves;
 		}
-		return BitboardUtility.bitboardToPieceMoves(position, board);
+		return board;
 	}
 
-	public List<PieceMove> genRook(int position, long blockers) {
+	public static long genRookClassical(long[][] rays, int position, long blockers) {
 		long board = 0L;
 		for(int i = 0; i < 4; i++) {
 			long maskedBlockers = blockers & rays[position][i * 2];
@@ -176,7 +225,7 @@ public class MoveGen {
 			}
 			board |= moves;
 		}
-		return BitboardUtility.bitboardToPieceMoves(position, board);
+		return board;
 	}
 
 	public List<PieceMove> genKing(int position, long blockers, boolean[] castleAvailable, int color) {
@@ -247,4 +296,19 @@ public class MoveGen {
 		ray &= ~(1L << position);
 		return ray;
 	}
+
+	private long blockerFromIdx(int idx, long mask) {
+		long blockers = 0L;
+		int bitAt = 0;
+		while(mask != 0) {
+			int lsb = Long.numberOfTrailingZeros(mask);
+			mask &= ~(1L << lsb);
+			if((idx & (1 << bitAt)) != 0) {
+				blockers |= 1L << lsb;
+			}
+			bitAt++;
+		}
+		return blockers;
+	}
+
 }

@@ -126,19 +126,26 @@ public class UCIInterface {
 					}
 					double[] bestMove = new double[4];
 					engine.keepSearching = true;
-					if(!infinite && depth == -1) {
-						Thread waitThread = new Thread(new TellEngineStop(time));
-						waitThread.start();
-					}
-					for(int i = 1; keepGoing(i, startTime, time, infinite, depth); i++) {
-						double[] bestMoveTemp = engine.bestMove(game, color, i);
-						if(bestMoveTemp[0] != -1) {
-							bestMove = bestMoveTemp;
-						} else {
-							if(debug) {
-								System.out.println("info time " + (System.currentTimeMillis() - startTime));
+					if(depth != -1) {
+						bestMove = engine.bestMove(game, color, depth);
+						if(debug) {
+							System.out.println("info time " + (System.currentTimeMillis() - startTime));
+						}
+					} else {
+						if(!infinite) {
+							Thread waitThread = new Thread(new TellEngineStop(time));
+							waitThread.start();
+						}
+						for(int i = 1; keepGoing(i, startTime, time, infinite, depth); i++) {
+							double[] bestMoveTemp = engine.bestMove(game, color, i);
+							if(bestMoveTemp[0] != -1) {
+								bestMove = bestMoveTemp;
+							} else {
+								if(debug) {
+									System.out.println("info time " + (System.currentTimeMillis() - startTime));
+								}
+								break;
 							}
-							break;
 						}
 					}
 					int[] startPos = new int[] {(int)(bestMove[0] % 8), (int)(bestMove[0] / 8)};

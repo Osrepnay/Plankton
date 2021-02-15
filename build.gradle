@@ -1,17 +1,17 @@
 plugins {
-    id 'java-library'
+	id 'java-library'
 }
 
 jar {
-    manifest {
-        attributes 'Main-Class': 'io.github.osrepnay.plankton.UCIInterface'
-    }
+	manifest {
+		attributes 'Main-Class': 'io.github.osrepnay.plankton.UCIInterface'
+	}
 }
 
 repositories {
-    jcenter()
+	jcenter()
 }
 
 dependencies {
-    testImplementation 'junit:junit:4.12'
+	testImplementation 'junit:junit:4.12'
 }
